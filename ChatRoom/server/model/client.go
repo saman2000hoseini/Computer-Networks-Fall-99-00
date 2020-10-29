@@ -6,11 +6,11 @@ import (
 )
 
 type Client struct {
-	connection net.Conn
-	writer     *bufio.Writer
-	reader     *bufio.Reader
+	Connection net.Conn
+	Writer     *bufio.Writer
+	Reader     *bufio.Reader
 }
 
 func NewClient(connection net.Conn) *Client {
-	return &Client{connection: connection, writer: bufio.NewWriter(connection), reader: bufio.NewReader(connection)}
+	return &Client{Connection: connection, Writer: bufio.NewWriter(connection), Reader: bufio.NewReader(connection)}
 }

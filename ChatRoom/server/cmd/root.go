@@ -10,7 +10,7 @@ import (
 )
 
 func Execute() {
-	mydb, err := db.FirstSetup()
+	myDB, err := db.FirstSetup()
 	if err != nil {
 		logrus.Fatalf("failed to setup db: %s", err.Error())
 	}
@@ -27,7 +27,7 @@ func Execute() {
 			panic(err)
 		}
 
-		clientHandler := handler.NewClientHandler(model.NewClient(connection), mydb)
+		clientHandler := handler.NewClientHandler(model.NewClient(connection), myDB)
 		go clientHandler.StartListening()
 	}
 }

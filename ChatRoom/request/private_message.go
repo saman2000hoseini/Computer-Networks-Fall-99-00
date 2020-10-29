@@ -3,6 +3,7 @@ package request
 import (
 	"encoding/json"
 	"errors"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ func NewMessageRequest(from, to, message string) (*PrivateMessage, error) {
 	}, nil
 }
 
-func (s PrivateMessage) GenerateRequest() (*PackedRequest, error) {
+func (s PrivateMessage) GenerateRequest() (*request.Request, error) {
 	body, err := json.Marshal(s)
 	if err != nil {
 		return nil, errors.New("couldn't marshal body: " + err.Error())
