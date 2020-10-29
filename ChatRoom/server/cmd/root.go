@@ -27,7 +27,7 @@ func Execute() {
 			panic(err)
 		}
 
-		clientHandler := handler.NewClientHandler(model.NewClient(connection), myDB)
-		go clientHandler.StartListening()
+		clientHandler := handler.NewClientHandler(myDB)
+		go clientHandler.StartListening(model.NewClient(connection))
 	}
 }

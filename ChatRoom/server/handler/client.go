@@ -3,39 +3,61 @@ package handler
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
+	request2 "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 )
 
 type ClientHandler struct {
-	Client *model.Client
-	db     *gorm.DB
+	db      *gorm.DB
+	clients map[uint64]*model.Client
 }
 
-func NewClientHandler(client *model.Client, db *gorm.DB) ClientHandler {
-	return ClientHandler{Client: client, db: db}
+func NewClientHandler(db *gorm.DB) ClientHandler {
+	return ClientHandler{db: db}
 }
 
-func (c ClientHandler) StartListening() {
+func (c ClientHandler) StartListening(Client *model.Client) {
 	for {
 		var req []byte
 
-		_, err := c.Client.Reader.Read(req)
+		_, err := Client.Reader.Read(req)
 		if err != nil {
 			//TODO
 		}
 
-		handleRequest(unmarshal(req))
+		protoRequest, err := unmarshal(req)
+		if err != nil {
+			logrus.Errorf("client handler: err while unmarshalling proto: %s", err.Error())
+			continue
+		}
+
+		c.handleRequest(protoRequest)
 	}
 }
 
-func unmarshal(req []byte) request.Request {
-	request := request.Request{}
-	proto.Unmarshal(req, &request)
+func unmarshal(req []byte) (*request.Request, error) {
+	protoRequest := request.Request{}
+	err := proto.Unmarshal(req, &protoRequest)
+	if err != nil {
+		return nil, err
+	}
 
-	return request
+	return &protoRequest, nil
 }
 
-func handleRequest(request request.Request) {
+func (c ClientHandler) handleRequest(request *request.Request) {
+	switch request.Type {
+	case request2.SignInType:
+		c.HandleSignIn(request.Body)
+		break
+	case request2.SignUpType:
+		c.HandleSignUp(request.Body)
+		break
+	case request2.PrivateMessageType:
+		c.HandlePrivateMessage(request.Body)
+		break
 
+	}
 }

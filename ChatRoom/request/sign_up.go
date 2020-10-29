@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const signUp = "signup"
+const SignUpType = "signup"
 
 type SignUp struct {
 	Username string  `json:"username"`
@@ -41,7 +41,7 @@ func (s SignUp) GenerateRequest() (*request.Request, error) {
 		return nil, errors.New("couldn't marshal body: " + err.Error())
 	}
 
-	return New(signUp, body), nil
+	return New(SignUpType, body), nil
 }
 
 type User interface {

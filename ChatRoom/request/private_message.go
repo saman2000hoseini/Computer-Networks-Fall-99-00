@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const message = "message"
+const PrivateMessageType = "message"
 
 type PrivateMessage struct {
 	From    string `json:"from"`
@@ -28,11 +28,11 @@ func NewMessageRequest(from, to, message string) (*PrivateMessage, error) {
 	}, nil
 }
 
-func (s PrivateMessage) GenerateRequest() (*request.Request, error) {
-	body, err := json.Marshal(s)
+func (p PrivateMessage) GenerateRequest() (*request.Request, error) {
+	body, err := json.Marshal(p)
 	if err != nil {
 		return nil, errors.New("couldn't marshal body: " + err.Error())
 	}
 
-	return New(message, body), nil
+	return New(PrivateMessageType, body), nil
 }

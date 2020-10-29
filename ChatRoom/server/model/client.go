@@ -7,6 +7,7 @@ import (
 
 type Client struct {
 	Connection net.Conn
+	ID         uint64
 	Writer     *bufio.Writer
 	Reader     *bufio.Reader
 }
