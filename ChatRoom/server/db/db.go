@@ -2,15 +2,13 @@ package db
 
 import (
 	"errors"
-	"fmt"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
-	"os"
-
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 func NewDB() (*gorm.DB, error) {
-	db, err := gorm.Open("sqlite3", "./myDB.db")
+	db, err := gorm.Open(sqlite.Open("./myDB.db"), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +17,7 @@ func NewDB() (*gorm.DB, error) {
 
 //create tables from models
 func migrate(db *gorm.DB) error {
-	err := db.AutoMigrate(&model.User{}, &model.Group{}).Error
+	err := db.AutoMigrate(&model.User{}, &model.Group{})
 	return err
 }
 
@@ -31,24 +29,7 @@ func FirstSetup() (*gorm.DB, error) {
 	}
 	err = migrate(db)
 	if err != nil {
-		return nil, errors.New("error on creating tables")
+		return nil, errors.New("error on creating tables" + err.Error())
 	}
 	return db, nil
-}
-
-func TestDB() *gorm.DB {
-	db, err := gorm.Open("sqlite3", "./../myDB_test.db")
-	if err != nil {
-		fmt.Println("storage err: ", err)
-	}
-	db.LogMode(false)
-	return db
-}
-
-func DropTestDB() error {
-	if err :=
-		os.Remove("./../myDB_test.db"); err != nil {
-		return err
-	}
-	return nil
 }
