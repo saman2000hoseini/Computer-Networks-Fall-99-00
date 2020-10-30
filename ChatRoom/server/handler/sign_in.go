@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (c ClientHandler) HandleSignIn(body []byte, client *model.Client) (*request.Request, error) {
+func (c *ClientHandler) HandleSignIn(body []byte, client *model.Client) (*request.Request, error) {
 	info := &serverRequest.SignIn{}
 	err := json.Unmarshal(body, info)
 	if err != nil {
@@ -25,7 +25,7 @@ func (c ClientHandler) HandleSignIn(body []byte, client *model.Client) (*request
 		return response.NewSignResponse(err).GenerateResponse()
 	}
 
-	if info.Password != stored.Password {
+	if !stored.CheckPassword(info.Password) {
 		return response.NewSignResponse(errors.New(utils.ErrWrongPassword)).GenerateResponse()
 	}
 

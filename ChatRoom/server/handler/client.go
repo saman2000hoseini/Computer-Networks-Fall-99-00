@@ -16,11 +16,11 @@ type ClientHandler struct {
 	clients map[string]*model.Client
 }
 
-func NewClientHandler(db *gorm.DB) ClientHandler {
-	return ClientHandler{db: db, clients: make(map[string]*model.Client)}
+func NewClientHandler(db *gorm.DB) *ClientHandler {
+	return &ClientHandler{db: db, clients: make(map[string]*model.Client)}
 }
 
-func (c ClientHandler) StartListening(client *model.Client) {
+func (c *ClientHandler) StartListening(client *model.Client) {
 	for {
 		req := make([]byte, 1024)
 
@@ -50,7 +50,7 @@ func unmarshal(req []byte) (*request.Request, error) {
 	return protoRequest, nil
 }
 
-func (c ClientHandler) handleRequest(req *request.Request, client *model.Client) {
+func (c *ClientHandler) handleRequest(req *request.Request, client *model.Client) {
 	resp := &request.Request{}
 	var err error
 
@@ -92,6 +92,10 @@ func (c ClientHandler) handleRequest(req *request.Request, client *model.Client)
 		return
 	}
 
+	c.Respond(resp, client)
+}
+
+func (c *ClientHandler) Respond(resp *request.Request, client *model.Client) {
 	out, err := proto.Marshal(resp)
 	if err != nil {
 		logrus.Errorf("client handler: err while marshalling proto: %s", err.Error())

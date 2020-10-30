@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
 	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
@@ -16,11 +17,11 @@ type ClientHandler struct {
 	waiter   chan bool
 }
 
-func NewClientHandler(client *model.Client) ClientHandler {
-	return ClientHandler{client: client, signedIn: false}
+func NewClientHandler(client *model.Client) *ClientHandler {
+	return &ClientHandler{client: client, signedIn: false, waiter: make(chan bool)}
 }
 
-func (c ClientHandler) Handle() {
+func (c *ClientHandler) Handle() {
 	go c.StartListening()
 
 	for !c.signedIn {
@@ -39,6 +40,7 @@ func (c ClientHandler) Handle() {
 			fmt.Scanf("%s\n%s\n", &username, &password)
 			c.username = &username
 			si, _ := serverRequest.NewSignInRequest(username, password)
+			println(si.Password)
 			req, _ := si.GenerateRequest()
 			c.Request(req)
 		}
@@ -58,7 +60,7 @@ func (c ClientHandler) Handle() {
 	}
 }
 
-func (c ClientHandler) StartListening() {
+func (c *ClientHandler) StartListening() {
 	for {
 		req := make([]byte, 1024)
 
@@ -66,7 +68,6 @@ func (c ClientHandler) StartListening() {
 		if err != nil {
 			//TODO
 		}
-		fmt.Println("response received")
 
 		protoRequest, err := unmarshal(req[:count])
 		if err != nil {
@@ -79,26 +80,23 @@ func (c ClientHandler) StartListening() {
 }
 
 func unmarshal(req []byte) (*request.Request, error) {
-	protoRequest := request.Request{}
-	err := proto.Unmarshal(req, &protoRequest)
+	protoRequest := &request.Request{}
+	err := proto.Unmarshal(req, protoRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	return &protoRequest, nil
+	return protoRequest, nil
 }
 
-func (c ClientHandler) handleRequest(req *request.Request) {
+func (c *ClientHandler) handleRequest(req *request.Request) {
 	var err error
 
 	switch req.Type {
-	case serverRequest.SignInType:
+	case response.SignType:
 		err = c.HandleSign(req.Body)
 		break
-	case serverRequest.SignUpType:
-		err = c.HandleSign(req.Body)
-		break
-	case serverRequest.PrivateMessageType:
+	case response.PrivateMessageType:
 		err = c.HandlePrivateMessage(req.Body)
 		break
 

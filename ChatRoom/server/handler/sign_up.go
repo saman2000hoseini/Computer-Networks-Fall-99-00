@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (c ClientHandler) HandleSignUp(body []byte, client *model.Client) (*request.Request, error) {
+func (c *ClientHandler) HandleSignUp(body []byte, client *model.Client) (*request.Request, error) {
 	info := &serverRequest.SignUp{}
 	err := json.Unmarshal(body, info)
 	if err != nil {

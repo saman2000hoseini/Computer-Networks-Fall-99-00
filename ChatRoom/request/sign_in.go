@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
-	"golang.org/x/crypto/bcrypt"
 )
 
 const SignInType = "signin"
@@ -22,14 +21,9 @@ func NewSignInRequest(username, password string) (*SignIn, error) {
 		return nil, errors.New("password is not under 8 chars")
 	}
 
-	hPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-
 	return &SignIn{
 		Username: username,
-		Password: string(hPass),
+		Password: password,
 	}, nil
 }
 

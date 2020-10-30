@@ -1,5 +1,7 @@
 package model
 
+import "golang.org/x/crypto/bcrypt"
+
 type User struct {
 	Username string   `gorm:"primaryKey;not null"`
 	Password string   `gorm:"not null"`
@@ -9,5 +11,6 @@ type User struct {
 }
 
 func (u *User) CheckPassword(p string) bool {
-	return p == u.Password
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(p))
+	return err == nil
 }

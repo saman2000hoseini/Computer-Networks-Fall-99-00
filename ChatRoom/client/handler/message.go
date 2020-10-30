@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (c ClientHandler) HandlePrivateMessage(body []byte) error {
+func (c *ClientHandler) HandlePrivateMessage(body []byte) error {
 	msg := &request.PrivateMessage{}
 	err := json.Unmarshal(body, msg)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (c ClientHandler) HandleSign(body []byte) error {
+func (c *ClientHandler) HandleSign(body []byte) error {
 	resp := &response.Sign{}
 	err := json.Unmarshal(body, resp)
 	if err != nil {
