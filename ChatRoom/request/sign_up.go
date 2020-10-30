@@ -10,12 +10,12 @@ import (
 const SignUpType = "signup"
 
 type SignUp struct {
-	Username string  `json:"username"`
-	Password string  `json:"password"`
-	Email    *string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
-func NewSignUpRequest(username, password string, email *string) (*SignUp, error) {
+func NewSignUpRequest(username, password string, email string) (*SignUp, error) {
 	if len(username) < 6 {
 		return nil, errors.New("name can't be under 6 chars")
 	}

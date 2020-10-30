@@ -16,7 +16,13 @@ func (c ClientHandler) HandleSignUp(body []byte, client *model.Client) (*request
 		logrus.Errorf("sign up handler: err while unmarshalling request: %s", err.Error())
 	}
 
-	err = c.db.Create(info).Error
+	user := &model.User{
+		Username: info.Username,
+		Password: info.Password,
+		Email:    info.Email,
+	}
+
+	err = c.db.Create(user).Error
 	if err == nil {
 		c.clients[info.Username] = client
 	}

@@ -14,7 +14,7 @@ type SignIn struct {
 	Password string `json:"password"`
 }
 
-func NewSignInRequest(username, password string, email *string) (*SignIn, error) {
+func NewSignInRequest(username, password string) (*SignIn, error) {
 	if len(username) < 6 {
 		return nil, errors.New("name is not under 6 chars")
 	}

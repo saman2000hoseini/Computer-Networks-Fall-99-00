@@ -6,8 +6,9 @@ require (
 	github.com/golang/protobuf v1.4.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/knadh/koanf v0.14.0
-	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.7.0
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
 	google.golang.org/protobuf v1.25.0
+	gorm.io/driver/sqlite v1.1.3
+	gorm.io/gorm v1.20.5
 )

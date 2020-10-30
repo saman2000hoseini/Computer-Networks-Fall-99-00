@@ -12,12 +12,14 @@ import (
 )
 
 func (c ClientHandler) HandleSignIn(body []byte, client *model.Client) (*request.Request, error) {
-	var info, stored *serverRequest.SignIn
+	info := &serverRequest.SignIn{}
 	err := json.Unmarshal(body, info)
 	if err != nil {
 		logrus.Errorf("sign in handler: err while unmarshalling request: %s", err.Error())
+		return nil, err
 	}
 
+	var stored model.User
 	err = c.db.Where(&model.User{Username: info.Username}).First(&stored).Error
 	if err != nil {
 		return response.NewSignResponse(err).GenerateResponse()

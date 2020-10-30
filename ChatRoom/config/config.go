@@ -6,12 +6,14 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/structs"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 type (
 	Server struct {
-		Network string `koanf:"network"`
-		Address string `koanf:"address"`
+		Network string        `koanf:"network"`
+		Address string        `koanf:"address"`
+		TimeOut time.Duration `koanf:"time-out"`
 	}
 )
 
