@@ -18,7 +18,7 @@ type PrivateMessage struct {
 func NewMessageRequest(from, to, message string) (*PrivateMessage, error) {
 	message = strings.TrimSpace(message)
 	if len(message) < 1 {
-		return nil, errors.New("name is not under 6 chars")
+		return nil, errors.New("message cannot be empty")
 	}
 
 	return &PrivateMessage{

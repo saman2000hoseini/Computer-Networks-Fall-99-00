@@ -53,7 +53,7 @@ func (c *ClientHandler) Handle() {
 		var cmd int
 		fmt.Scanf("%d\n", &cmd)
 		var username, msg string
-		fmt.Scanf("%s\n%s\n%s\n", &username, &msg)
+		fmt.Scanf("%s\n%s\n", &username, &msg)
 		su, _ := serverRequest.NewMessageRequest(*c.username, username, msg)
 		req, _ := su.GenerateRequest()
 		c.Request(req)

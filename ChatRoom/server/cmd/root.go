@@ -21,6 +21,8 @@ func Execute() {
 	server, err := net.Listen(cfg.Network, cfg.Address)
 	fmt.Println("Server has started")
 
+	clientHandler := handler.NewClientHandler(myDB)
+
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +33,6 @@ func Execute() {
 		}
 		fmt.Println("Someone joined")
 
-		clientHandler := handler.NewClientHandler(myDB)
 		go clientHandler.StartListening(model.NewClient(connection))
 	}
 }

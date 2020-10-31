@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/utils"
 	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
@@ -18,13 +19,14 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 		return client, nil, err
 	}
 
+	fmt.Printf("%s, %v\n", msg.To, c.clients[msg.To])
 	if c.clients[msg.To] != nil {
-		client = c.clients[msg.To]
-	} else {
-		msg.To = ""
-		msg.Message = utils.ErrUserNotFound
+		req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
+		return c.clients[msg.To], req, err
 	}
 
+	msg.To = ""
+	msg.Message = utils.ErrUserNotFound
 	req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
 	return client, req, err
 }
