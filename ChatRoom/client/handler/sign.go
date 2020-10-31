@@ -22,7 +22,6 @@ func (c *ClientHandler) HandleSign(body []byte) error {
 		c.Users = resp.OnlineUsers
 		c.waiter <- true
 		c.usersChange <- true
-		<-c.waiter
 		return nil
 	}
 

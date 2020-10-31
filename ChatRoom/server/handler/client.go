@@ -29,7 +29,7 @@ func (c *ClientHandler) StartListening(client *model.Client) {
 		count, err := client.Reader.Read(req)
 		if err != nil {
 			delete(c.clients, client.Username)
-			response.LogOut(c.clientIDs, client.Username)
+			response.LogOut(&c.clientIDs, client.Username)
 			c.informJoin(client.Username, false)
 			break
 		}
@@ -129,7 +129,9 @@ func (c *ClientHandler) informJoin(username string, joined bool) {
 		logrus.Errorf("client handler: error while generating global message: %s", err.Error())
 		return
 	}
-
+	fmt.Println(gm)
+	fmt.Println(c.clients)
+	fmt.Println(c.clientIDs)
 	c.informAll(gm)
 }
 

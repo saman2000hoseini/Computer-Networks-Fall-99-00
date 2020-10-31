@@ -10,7 +10,9 @@ import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
+	"log"
 	"strings"
+	"time"
 )
 
 type ClientHandler struct {
@@ -36,24 +38,28 @@ func NewClientHandler(client *model.Client) *ClientHandler {
 }
 
 func (c *ClientHandler) Handle() {
+	var err error
 	go c.StartListening()
 	go c.Request()
 
 	c.entrance()
 
-	c.gui, _ = gocui.NewGui(gocui.OutputNormal)
-	defer c.gui.Close()
+	c.gui, err = gocui.NewGui(gocui.OutputNormal)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	c.gui.SetManagerFunc(view.Layout)
 	c.gui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, c.Send)
 	c.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, c.Disconnect)
-	c.gui.MainLoop()
 	go c.writeMessage()
 	go c.updateUsers()
-	c.waiter <- true
+	c.gui.MainLoop()
 }
 
 func (c *ClientHandler) StartListening() {
+	defer c.gui.Close()
+
 	for {
 		req := make([]byte, 1024)
 
@@ -151,7 +157,6 @@ func (c *ClientHandler) entrance() {
 
 		<-c.waiter
 	}
-	println("finished")
 }
 
 func (c *ClientHandler) Disconnect(g *gocui.Gui, v *gocui.View) error {
@@ -160,7 +165,11 @@ func (c *ClientHandler) Disconnect(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ClientHandler) writeMessage() {
-	messagesView, _ := c.gui.View("messages")
+	<-time.Tick(1 * time.Second)
+	messagesView, err := c.gui.View("messages")
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 		msg := <-c.messages
@@ -173,7 +182,11 @@ func (c *ClientHandler) writeMessage() {
 }
 
 func (c *ClientHandler) updateUsers() {
-	usersView, _ := c.gui.View("users")
+	<-time.Tick(1 * time.Second)
+	usersView, err := c.gui.View("users")
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 		<-c.usersChange

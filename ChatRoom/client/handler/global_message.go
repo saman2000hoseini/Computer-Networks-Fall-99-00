@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 func (c *ClientHandler) HandleGlobalMessage(body []byte) error {
@@ -18,17 +19,13 @@ func (c *ClientHandler) HandleGlobalMessage(body []byte) error {
 	if resp.Joined != nil {
 		if *resp.Joined {
 			c.Users = append(c.Users, resp.Message)
-			c.messages <- fmt.Sprintf("\x1b[0;32m+ %s connected\033[0m\n", resp.Message)
+			c.messages <- fmt.Sprintf("[%v] \x1b[0;32m+ %s connected\033[0m", time.Now().Local(), resp.Message)
 		} else {
-			response.LogOut(c.Users, resp.Message)
-			c.messages <- fmt.Sprintf("\x1b[0;31m- %s disconnected\033[0m\n", resp.Message)
+			response.LogOut(&c.Users, resp.Message)
+			c.messages <- fmt.Sprintf("[%v] \x1b[0;31m- %s disconnected\033[0m", time.Now().Local(), resp.Message)
 		}
 		c.usersChange <- true
 	}
-
-	fmt.Println(resp.Message)
-
-	c.waiter <- true
 
 	return nil
 }

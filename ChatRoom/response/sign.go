@@ -33,12 +33,12 @@ func (s Sign) GenerateResponse() (*request.Request, error) {
 	return New(SignType, body), nil
 }
 
-func LogOut(users []string, user string) {
-	for index := range users {
-		if users[index] == user {
-			users[index] = users[len(users)-1]
-			users[len(users)-1] = ""
-			users = users[:len(users)-1]
+func LogOut(users *[]string, user string) {
+	for index := range *users {
+		if (*users)[index] == user {
+			(*users)[index] = (*users)[len(*users)-1]
+			(*users)[len(*users)-1] = ""
+			*users = (*users)[:len(*users)-1]
 			return
 		}
 	}

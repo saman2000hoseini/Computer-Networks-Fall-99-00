@@ -19,16 +19,17 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte) error {
 		return err
 	}
 
-	fmt.Sprintf("[%v] %s: %s", time.Now().Local(), msg.From, msg.Message)
+	c.messages <- msgToString(msg)
 	return nil
 }
 
 func (c *ClientHandler) Send(g *gocui.Gui, v *gocui.View) error {
-	req, err := parseInput(*c.username, v.Buffer())
+	msg, req, err := parseInput(*c.username, v.Buffer())
 	if err != nil {
 		return err
 	}
 
+	c.messages <- msgToString(msg)
 	c.client.Out <- req
 	g.Update(func(g *gocui.Gui) error {
 		v.Clear()
@@ -39,10 +40,15 @@ func (c *ClientHandler) Send(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func parseInput(username, input string) (*request.Request, error) {
+func parseInput(username, input string) (*serverRequest.PrivateMessage, *request.Request, error) {
 	args := strings.Split(input, ">")
 	msg, _ := serverRequest.NewMessageRequest(username, strings.TrimSpace(args[0]), args[1])
+
 	req, err := msg.GenerateRequest()
 
-	return req, err
+	return msg, req, err
+}
+
+func msgToString(msg *serverRequest.PrivateMessage) string {
+	return fmt.Sprintf("[%v] %s: %s", time.Now().Local(), msg.From, msg.Message)
 }
