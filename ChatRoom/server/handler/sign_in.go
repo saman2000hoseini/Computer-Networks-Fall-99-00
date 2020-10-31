@@ -22,13 +22,16 @@ func (c *ClientHandler) HandleSignIn(body []byte, client *model.Client) (*reques
 	var stored model.User
 	err = c.db.Where(&model.User{Username: info.Username}).First(&stored).Error
 	if err != nil {
-		return response.NewSignResponse(err).GenerateResponse()
+		return response.NewSignResponse(err, nil).GenerateResponse()
 	}
 
 	if !stored.CheckPassword(info.Password) {
-		return response.NewSignResponse(errors.New(utils.ErrWrongPassword)).GenerateResponse()
+		return response.NewSignResponse(errors.New(utils.ErrWrongPassword), nil).GenerateResponse()
 	}
 
+	client.Username = info.Username
 	c.clients[info.Username] = client
-	return response.NewSignResponse(nil).GenerateResponse()
+	c.clientIDs = append(c.clientIDs, info.Username)
+	c.informJoin(info.Username, true)
+	return response.NewSignResponse(nil, c.clientIDs).GenerateResponse()
 }

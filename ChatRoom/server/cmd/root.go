@@ -33,6 +33,8 @@ func Execute() {
 		}
 		fmt.Println("Someone joined")
 
-		go clientHandler.StartListening(model.NewClient(connection))
+		client := model.NewClient(connection)
+		go clientHandler.StartListening(client)
+		go clientHandler.Respond(client)
 	}
 }

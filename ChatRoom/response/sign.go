@@ -12,15 +12,16 @@ const (
 )
 
 type Sign struct {
-	Message string `json:"message"`
+	Message     string   `json:"message"`
+	OnlineUsers []string `json:"online_users"`
 }
 
-func NewSignResponse(err error) *Sign {
+func NewSignResponse(err error, onlineUsers []string) *Sign {
 	if err != nil {
-		return &Sign{err.Error()}
+		return &Sign{err.Error(), onlineUsers}
 	}
 
-	return &Sign{Success}
+	return &Sign{Success, onlineUsers}
 }
 
 func (s Sign) GenerateResponse() (*request.Request, error) {
@@ -30,4 +31,15 @@ func (s Sign) GenerateResponse() (*request.Request, error) {
 	}
 
 	return New(SignType, body), nil
+}
+
+func LogOut(users []string, user string) {
+	for index := range users {
+		if users[index] == user {
+			users[index] = users[len(users)-1]
+			users[len(users)-1] = ""
+			users = users[:len(users)-1]
+			return
+		}
+	}
 }

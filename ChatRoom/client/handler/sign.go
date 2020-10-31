@@ -19,10 +19,14 @@ func (c *ClientHandler) HandleSign(body []byte) error {
 
 	if resp.Message == response.Success {
 		c.signedIn = true
+		c.Users = resp.OnlineUsers
+		c.waiter <- true
+		c.usersChange <- true
+		<-c.waiter
+		return nil
 	}
 
 	fmt.Println(resp.Message)
-
 	c.waiter <- true
 
 	return nil

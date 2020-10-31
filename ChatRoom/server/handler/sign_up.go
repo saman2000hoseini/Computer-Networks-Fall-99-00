@@ -24,8 +24,11 @@ func (c *ClientHandler) HandleSignUp(body []byte, client *model.Client) (*reques
 
 	err = c.db.Create(user).Error
 	if err == nil {
+		client.Username = info.Username
 		c.clients[info.Username] = client
+		c.clientIDs = append(c.clientIDs, info.Username)
+		c.informJoin(info.Username, true)
 	}
 
-	return response.NewSignResponse(err).GenerateResponse()
+	return response.NewSignResponse(err, c.clientIDs).GenerateResponse()
 }

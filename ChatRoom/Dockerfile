@@ -28,3 +28,5 @@ RUN apk update && apk --no-cache add ca-certificates \
     sqlite
 
 COPY --from=build /app /app/
+
+ENTRYPOINT ["main"]
