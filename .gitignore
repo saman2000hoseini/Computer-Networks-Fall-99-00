@@ -126,3 +126,5 @@ modules.xml
 *.mdb
 *.pdb
 *.sqlite3
+/ChatRoom/client/downloads/
+/ChatRoom/server/storage/
