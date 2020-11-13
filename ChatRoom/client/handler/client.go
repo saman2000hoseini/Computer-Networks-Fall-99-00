@@ -30,7 +30,7 @@ func NewClientHandler(client *model.Client) *ClientHandler {
 		client:      client,
 		signedIn:    false,
 		waiter:      make(chan bool),
-		messages:    make(chan string, 20),
+		messages:    make(chan string, 100),
 		Users:       make([]string, 0),
 		usersChange: make(chan bool, 5),
 	}
@@ -101,6 +101,10 @@ func (c *ClientHandler) handleRequest() {
 			break
 		case response.GlobalMessageType:
 			err = c.HandleGlobalMessage(req.Body)
+			break
+		case response.DownloadFileType:
+			err = c.HandleGetFile(req)
+			break
 		}
 		if err != nil {
 			fmt.Println(err.Error())

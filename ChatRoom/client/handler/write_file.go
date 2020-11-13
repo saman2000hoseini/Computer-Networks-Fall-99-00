@@ -1,19 +1,18 @@
 package handler
 
+import "C"
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"os"
+	"strings"
+	"time"
 )
 
-const BufferSize = 4096
-
-func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.Client) error {
+func (c *ClientHandler) HandleGetFile(initReq *request.Request) error {
 	fileRequest := &request.WriteFile{}
 	err := json.Unmarshal(initReq.Body, fileRequest)
 	if err != nil {
@@ -31,7 +30,7 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 			return err
 		}
 	} else {
-		client.In <- initReq
+		c.client.In <- initReq
 		return nil
 	}
 
@@ -39,25 +38,15 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 
 	for {
 		if counter*BufferSize >= fileRequest.Size {
-			fmt.Println("finished")
-			if c.clients[*fileRequest.To] != nil {
-				req, err := response.NewMessageResponse(*fileRequest.From, *fileRequest.To,
-					generateMsg(fileRequest.FileName)).GenerateResponse()
+			c.messages <- fmt.Sprintf("[%v] \u001B[1;33m downloading %s finished \u001B[0m",
+				time.Now().Local(), fileRequest.FileName)
 
-				c.clients[*fileRequest.To].Out <- req
-				return err
-			}
-
-			req, err := response.NewMessageResponse(*fileRequest.From, "",
-				pkg.ErrUserNotFound).GenerateResponse()
-
-			client.Out <- req
-			return err
+			return nil
 		}
 
-		req := <-client.In
-		if req.Type != request.WriteFileType {
-			client.In <- req
+		req := <-c.client.In
+		if req.Type != response.DownloadFileType {
+			c.client.In <- req
 			continue
 		}
 
@@ -69,13 +58,13 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 		}
 
 		if fileReq.FileName != fileRequest.FileName {
-			client.In <- req
+			c.client.In <- req
 			continue
 		}
 
 		counter++
 		if fileReq.Count != counter {
-			client.In <- req
+			c.client.In <- req
 			continue
 		}
 
@@ -84,9 +73,7 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 }
 
 func getPath(filename string) string {
-	return fmt.Sprintf("./server/storage/%s", filename)
-}
-
-func generateMsg(name string) string {
-	return fmt.Sprintf("sent you a file: %s", name)
+	i := strings.Index(filename, "_")
+	fName := filename[i+1:]
+	return fmt.Sprintf("./client/downloads/%s", fName)
 }

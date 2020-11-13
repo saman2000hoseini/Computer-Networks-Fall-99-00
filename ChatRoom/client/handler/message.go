@@ -43,8 +43,12 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	args[1] = strings.TrimSpace(args[1])
 
 	switch args[0] {
-	case request.FileType:
+	case "file":
 		go c.HandleWriteFile(*c.username, args[1], strings.TrimSpace(args[2]))
+		break
+	case "get":
+		req, err := request.NewReadFileRequest(args[1]).GenerateRequest()
+		c.Send(req, err)
 		break
 	default:
 		if args[0] != "all" && !c.contains(args[0]) {

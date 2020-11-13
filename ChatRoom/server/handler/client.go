@@ -68,8 +68,11 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 		case request.PrivateMessageType:
 			err = c.HandlePrivateMessage(req.Body, client)
 			break
-		case request.FileType:
+		case request.WriteFileType:
 			err = c.HandleWriteFile(req, client)
+			break
+		case request.ReadFileType:
+			err = c.HandleReadFile(req.Body, client)
 			break
 		}
 

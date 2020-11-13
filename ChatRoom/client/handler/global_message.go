@@ -19,14 +19,14 @@ func (c *ClientHandler) HandleGlobalMessage(body []byte) error {
 	if resp.Joined != nil {
 		if *resp.Joined {
 			c.Users = append(c.Users, resp.Message)
-			c.messages <- fmt.Sprintf("[%v] \x1b[0;32m+ %s connected\033[0m", time.Now().Local(), resp.Message)
+			c.messages <- fmt.Sprintf("[%v] \033[1;32m+ %s connected\033[0m", time.Now().Local(), resp.Message)
 		} else {
 			response.LogOut(&c.Users, resp.Message)
 			c.messages <- fmt.Sprintf("[%v] \x1b[0;31m- %s disconnected\033[0m", time.Now().Local(), resp.Message)
 		}
 		c.usersChange <- true
 	} else {
-		c.messages <- fmt.Sprintf("[%v] %s", time.Now().Local(), resp.Message)
+		c.messages <- fmt.Sprintf("[%v] \033[1;34m %s \033[0m", time.Now().Local(), resp.Message)
 	}
 
 	return nil

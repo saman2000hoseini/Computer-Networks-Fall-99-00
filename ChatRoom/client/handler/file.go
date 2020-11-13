@@ -34,8 +34,8 @@ func (c *ClientHandler) HandleWriteFile(from, to, src string) {
 	fSize := sourceFileStat.Size()
 	count := int64(0)
 
-	var fileReq *request.File
-	fileReq, _ = request.NewFileRequest(&from, &to, fName, nil, count, fSize)
+	var fileReq *request.WriteFile
+	fileReq, _ = request.NewWriteFileRequest(&from, &to, fName, nil, count, fSize)
 	req, err := fileReq.GenerateRequest()
 
 	c.Send(req, nil)
@@ -52,7 +52,7 @@ func (c *ClientHandler) HandleWriteFile(from, to, src string) {
 			break
 		}
 
-		fileReq, _ = request.NewFileRequest(nil, nil, fName, buf, count, int64(n))
+		fileReq, _ = request.NewWriteFileRequest(nil, nil, fName, buf, count, int64(n))
 		req, err := fileReq.GenerateRequest()
 
 		c.Send(req, nil)
