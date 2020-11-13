@@ -40,5 +40,5 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 }
 
 func newGlobalMsg(from, msg string) string {
-	return fmt.Sprintf("%s: %s", from, msg)
+	return fmt.Sprintf("Global: %s: %s", from, msg)
 }
