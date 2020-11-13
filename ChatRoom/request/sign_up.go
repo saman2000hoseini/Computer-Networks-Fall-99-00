@@ -3,7 +3,6 @@ package request
 import (
 	"encoding/json"
 	"errors"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -35,7 +34,7 @@ func NewSignUpRequest(username, password string, email string) (*SignUp, error) 
 	}, nil
 }
 
-func (s SignUp) GenerateRequest() (*request.Request, error) {
+func (s SignUp) GenerateRequest() (*Request, error) {
 	body, err := json.Marshal(s)
 	if err != nil {
 		return nil, errors.New("couldn't marshal body: " + err.Error())

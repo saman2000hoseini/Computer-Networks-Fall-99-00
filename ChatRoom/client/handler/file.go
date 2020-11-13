@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"io"
 	"os"
 	"strings"
@@ -34,8 +34,8 @@ func (c *ClientHandler) HandleWriteFile(from, to, src string) {
 	fSize := sourceFileStat.Size()
 	count := int64(0)
 
-	var fileReq *serverRequest.File
-	fileReq, _ = serverRequest.NewFileRequest(&from, &to, fName, nil, count, fSize)
+	var fileReq *request.File
+	fileReq, _ = request.NewFileRequest(&from, &to, fName, nil, count, fSize)
 	req, err := fileReq.GenerateRequest()
 
 	c.Send(req, nil)
@@ -52,7 +52,7 @@ func (c *ClientHandler) HandleWriteFile(from, to, src string) {
 			break
 		}
 
-		fileReq, _ = serverRequest.NewFileRequest(nil, nil, fName, buf, count, int64(n))
+		fileReq, _ = request.NewFileRequest(nil, nil, fName, buf, count, int64(n))
 		req, err := fileReq.GenerateRequest()
 
 		c.Send(req, nil)

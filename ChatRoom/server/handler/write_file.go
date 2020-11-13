@@ -3,9 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/utils"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
@@ -15,7 +14,7 @@ import (
 const BufferSize = 4096
 
 func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.Client) error {
-	fileRequest := &serverRequest.File{}
+	fileRequest := &request.File{}
 	err := json.Unmarshal(initReq.Body, fileRequest)
 	if err != nil {
 		logrus.Errorf("write file handler: error while unmarshalling request: %s", err.Error())
@@ -50,19 +49,19 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 			}
 
 			req, err := response.NewMessageResponse(*fileRequest.From, "",
-				utils.ErrUserNotFound).GenerateResponse()
+				pkg.ErrUserNotFound).GenerateResponse()
 
 			client.Out <- req
 			return err
 		}
 
 		req := <-client.In
-		if req.Type != serverRequest.FileType {
+		if req.Type != request.FileType {
 			client.In <- req
 			continue
 		}
 
-		fileReq := &serverRequest.File{}
+		fileReq := &request.File{}
 		err := json.Unmarshal(req.Body, fileReq)
 		if err != nil {
 			logrus.Errorf("write file handler: error while unmarshalling request: %s", err.Error())

@@ -1,6 +1,6 @@
 package response
 
-import "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
+import "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 
 type Response interface {
 	GenerateResponse() (*request.Request, error)

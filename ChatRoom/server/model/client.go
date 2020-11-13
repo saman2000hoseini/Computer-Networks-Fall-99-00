@@ -2,7 +2,7 @@ package model
 
 import (
 	"bufio"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"net"
 )
 

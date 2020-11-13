@@ -5,15 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jroimartin/gocui"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
 
 func (c *ClientHandler) HandlePrivateMessage(body []byte) error {
-	msg := &serverRequest.PrivateMessage{}
+	msg := &request.PrivateMessage{}
 	err := json.Unmarshal(body, msg)
 	if err != nil {
 		logrus.Errorf("client private message handler: err while unmarshalling message body: %s", err.Error())
@@ -44,7 +43,7 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	args[1] = strings.TrimSpace(args[1])
 
 	switch args[0] {
-	case serverRequest.FileType:
+	case request.FileType:
 		go c.HandleWriteFile(*c.username, args[1], strings.TrimSpace(args[2]))
 		break
 	default:
@@ -53,9 +52,9 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 			return nil
 		}
 
-		msg, _ := serverRequest.NewMessageRequest(*c.username, args[0], args[1])
+		msg, _ := request.NewMessageRequest(*c.username, args[0], args[1])
 		req, err = msg.GenerateRequest()
-		if err == nil && msg.To != "all" && req.Type == serverRequest.PrivateMessageType {
+		if err == nil && msg.To != "all" && req.Type == request.PrivateMessageType {
 			c.messages <- msgToString(msg)
 		}
 
@@ -71,7 +70,7 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
-func msgToString(msg *serverRequest.PrivateMessage) string {
+func msgToString(msg *request.PrivateMessage) string {
 	return fmt.Sprintf("[%v] %s: %s", time.Now().Local(), msg.From, msg.Message)
 }
 

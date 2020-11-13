@@ -1,14 +1,21 @@
 package request
 
-import "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
+import (
+	"encoding/json"
+)
 
-type Request interface {
-	GenerateRequest() (*request.Request, error)
+type Request struct {
+	Type string `json:"type"`
+	Body []byte `json:"body"`
 }
 
-func New(t string, rb []byte) *request.Request {
-	return &request.Request{
+func New(t string, rb []byte) *Request {
+	return &Request{
 		Type: t,
 		Body: rb,
 	}
+}
+
+func (r *Request) GenerateRequest() ([]byte, error) {
+	return json.Marshal(r)
 }

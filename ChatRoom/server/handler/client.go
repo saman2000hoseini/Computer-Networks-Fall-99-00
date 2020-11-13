@@ -1,14 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/utils"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 )
 
@@ -24,9 +23,7 @@ func NewClientHandler(db *gorm.DB) *ClientHandler {
 
 func (c *ClientHandler) StartListening(client *model.Client) {
 	for {
-		req := make([]byte, 10240)
-
-		size, err := client.Reader.Read(req)
+		req, err := client.Reader.ReadString('\n')
 		if err != nil {
 			delete(c.clients, client.Username)
 			response.LogOut(&c.clientIDs, client.Username)
@@ -34,24 +31,24 @@ func (c *ClientHandler) StartListening(client *model.Client) {
 			break
 		}
 
-		protoRequest, err := unmarshal(req[:size])
+		jsonRequest, err := unmarshal([]byte(req))
 		if err != nil {
 			logrus.Errorf("client handler: err while unmarshalling proto: %s", err.Error())
 			continue
 		}
 
-		client.In <- protoRequest
+		client.In <- jsonRequest
 	}
 }
 
 func unmarshal(req []byte) (*request.Request, error) {
-	protoRequest := &request.Request{}
-	err := proto.Unmarshal(req, protoRequest)
+	jsonReq := &request.Request{}
+	err := json.Unmarshal(req, jsonReq)
 	if err != nil {
 		return nil, err
 	}
 
-	return protoRequest, nil
+	return jsonReq, nil
 }
 
 func (c *ClientHandler) HandleRequest(client *model.Client) {
@@ -61,17 +58,17 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 		var err error
 
 		switch req.Type {
-		case serverRequest.SignInType:
+		case request.SignInType:
 			err = c.HandleSignIn(req.Body, client)
 			break
-		case serverRequest.SignUpType:
+		case request.SignUpType:
 			fmt.Println("signup request")
 			err = c.HandleSignUp(req.Body, client)
 			break
-		case serverRequest.PrivateMessageType:
+		case request.PrivateMessageType:
 			err = c.HandlePrivateMessage(req.Body, client)
 			break
-		case serverRequest.FileType:
+		case request.FileType:
 			err = c.HandleWriteFile(req, client)
 			break
 		}
@@ -82,15 +79,15 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 				resp = &request.Request{}
 			}
 
-			resp.Type = utils.ErrInternal
+			resp.Type = pkg.ErrInternal
 
-			out, err := proto.Marshal(resp)
+			out, err := json.Marshal(resp)
 			if err != nil {
 				logrus.Errorf("client handler: err while marshalling error proto: %s", err.Error())
 				return
 			}
 
-			_, err = client.Writer.Write(out)
+			_, err = client.Writer.WriteString(string(out) + "\n")
 			if err != nil {
 				logrus.Errorf("client handler: err while writing error proto: %s", err.Error())
 				return
@@ -108,13 +105,13 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 func (c *ClientHandler) Respond(client *model.Client) {
 	for {
 		resp := <-client.Out
-		out, err := proto.Marshal(resp)
+		out, err := json.Marshal(resp)
 		if err != nil {
 			logrus.Errorf("client handler: error while marshalling proto: %s", err.Error())
 			return
 		}
 
-		_, err = client.Writer.Write(out)
+		_, err = client.Writer.WriteString(string(out) + "\n")
 		if err != nil {
 			logrus.Errorf("client handler: error while writing proto: %s", err.Error())
 			return

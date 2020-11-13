@@ -3,15 +3,15 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/utils"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 )
 
 func (c *ClientHandler) HandleSignIn(body []byte, client *model.Client) error {
-	info := &serverRequest.SignIn{}
+	info := &request.SignIn{}
 	err := json.Unmarshal(body, info)
 	if err != nil {
 		logrus.Errorf("sign in handler: err while unmarshalling request: %s", err.Error())
@@ -28,7 +28,7 @@ func (c *ClientHandler) HandleSignIn(body []byte, client *model.Client) error {
 	}
 
 	if !stored.CheckPassword(info.Password) {
-		req, err := response.NewSignResponse(errors.New(utils.ErrWrongPassword), nil).GenerateResponse()
+		req, err := response.NewSignResponse(errors.New(pkg.ErrWrongPassword), nil).GenerateResponse()
 		client.Out <- req
 
 		return err

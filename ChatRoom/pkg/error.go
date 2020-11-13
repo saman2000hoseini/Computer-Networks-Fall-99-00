@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 const (
 	ErrWrongPassword = "the password you have entered is incorrect"

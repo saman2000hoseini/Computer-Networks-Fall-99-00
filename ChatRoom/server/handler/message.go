@@ -3,15 +3,15 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/utils"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 )
 
 func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) error {
-	msg := &serverRequest.PrivateMessage{}
+	msg := &request.PrivateMessage{}
 	err := json.Unmarshal(body, msg)
 	if err != nil {
 		logrus.Errorf("private message handler: err while unmarshalling request: %s", err.Error())
@@ -34,7 +34,7 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 	}
 
 	msg.To = ""
-	msg.Message = utils.ErrUserNotFound
+	msg.Message = pkg.ErrUserNotFound
 	req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
 
 	client.Out <- req

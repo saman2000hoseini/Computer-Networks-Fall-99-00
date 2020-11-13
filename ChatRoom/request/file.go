@@ -3,7 +3,6 @@ package request
 import (
 	"encoding/json"
 	"errors"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
 )
 
 const FileType = "file"
@@ -28,7 +27,7 @@ func NewFileRequest(from, to *string, fileName string, file []byte, count int64,
 	}, nil
 }
 
-func (f File) GenerateRequest() (*request.Request, error) {
+func (f File) GenerateRequest() (*Request, error) {
 	body, err := json.Marshal(f)
 	if err != nil {
 		return nil, errors.New("couldn't marshal body: " + err.Error())

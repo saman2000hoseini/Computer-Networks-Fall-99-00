@@ -1,15 +1,14 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/jroimartin/gocui"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/client/view"
-	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
 	"time"
@@ -62,31 +61,30 @@ func (c *ClientHandler) StartListening() {
 	defer c.gui.Close()
 
 	for {
-		req := make([]byte, 1024)
-
-		count, err := c.client.Reader.Read(req)
+		req, err := c.client.Reader.ReadString('\n')
 		if err != nil {
 			//TODO
+			return
 		}
 
-		protoRequest, err := unmarshal(req[:count])
+		jsonRequest, err := unmarshal([]byte(req))
 		if err != nil {
-			logrus.Errorf("client handler: err while unmarshalling proto: %s", err.Error())
+			logrus.Errorf("client handler: err while unmarshalling: %s", err.Error())
 			continue
 		}
 
-		c.client.In <- protoRequest
+		c.client.In <- jsonRequest
 	}
 }
 
 func unmarshal(req []byte) (*request.Request, error) {
-	protoRequest := &request.Request{}
-	err := proto.Unmarshal(req, protoRequest)
+	jsonRequest := &request.Request{}
+	err := json.Unmarshal(req, jsonRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	return protoRequest, nil
+	return jsonRequest, nil
 }
 
 func (c *ClientHandler) handleRequest() {
@@ -118,15 +116,15 @@ func (c *ClientHandler) Request() {
 	for {
 		req := <-c.client.Out
 
-		out, err := proto.Marshal(req)
+		out, err := json.Marshal(req)
 		if err != nil {
-			logrus.Errorf("client: error while marshalling request proto: %s", err.Error())
+			logrus.Errorf("client: error while marshalling request: %s", err.Error())
 			return
 		}
 
-		_, err = c.client.Writer.Write(out)
+		_, err = c.client.Writer.WriteString(string(out) + "\n")
 		if err != nil {
-			logrus.Errorf("client: error while writing request proto: %s", err.Error())
+			logrus.Errorf("client: error while writing request: %s", err.Error())
 			return
 		}
 
@@ -147,14 +145,14 @@ func (c *ClientHandler) entrance() {
 			var username, password, email string
 			fmt.Scanf("%s\n%s\n%s\n", &username, &password, &email)
 			c.username = &username
-			su, _ := serverRequest.NewSignUpRequest(username, password, email)
+			su, _ := request.NewSignUpRequest(username, password, email)
 			req, _ := su.GenerateRequest()
 			c.client.Out <- req
 		} else if cmd == 2 {
 			var username, password string
 			fmt.Scanf("%s\n%s\n", &username, &password)
 			c.username = &username
-			si, _ := serverRequest.NewSignInRequest(username, password)
+			si, _ := request.NewSignInRequest(username, password)
 			req, _ := si.GenerateRequest()
 			c.client.Out <- req
 		}

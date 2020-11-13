@@ -2,14 +2,14 @@ package handler
 
 import (
 	"encoding/json"
-	serverRequest "github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 )
 
 func (c *ClientHandler) HandleSignUp(body []byte, client *model.Client) error {
-	info := &serverRequest.SignUp{}
+	info := &request.SignUp{}
 	err := json.Unmarshal(body, info)
 	if err != nil {
 		logrus.Errorf("sign up handler: err while unmarshalling request: %s", err.Error())
