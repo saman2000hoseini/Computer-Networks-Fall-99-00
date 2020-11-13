@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jroimartin/gocui"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg/request"
@@ -24,12 +25,16 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte) error {
 }
 
 func (c *ClientHandler) Send(g *gocui.Gui, v *gocui.View) error {
-	msg, req, err := parseInput(*c.username, v.Buffer())
+	msg, req, err := c.parseInput(*c.username, v.Buffer())
 	if err != nil {
+		c.messages <- err.Error()
 		return err
 	}
 
-	c.messages <- msgToString(msg)
+	if msg.To != "all" {
+		c.messages <- msgToString(msg)
+	}
+
 	c.client.Out <- req
 	g.Update(func(g *gocui.Gui) error {
 		v.Clear()
@@ -40,9 +45,17 @@ func (c *ClientHandler) Send(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func parseInput(username, input string) (*serverRequest.PrivateMessage, *request.Request, error) {
+func (c *ClientHandler) parseInput(username, input string) (*serverRequest.PrivateMessage, *request.Request, error) {
 	args := strings.Split(input, ">")
-	msg, _ := serverRequest.NewMessageRequest(username, strings.TrimSpace(args[0]), args[1])
+	args[0] = strings.TrimSpace(args[0])
+	switch args[0] {
+	default:
+		if args[0] != "all" && !c.contains(args[0]) {
+			return nil, nil, errors.New("user does not exist")
+		}
+	}
+
+	msg, _ := serverRequest.NewMessageRequest(username, args[0], args[1])
 
 	req, err := msg.GenerateRequest()
 
@@ -51,4 +64,14 @@ func parseInput(username, input string) (*serverRequest.PrivateMessage, *request
 
 func msgToString(msg *serverRequest.PrivateMessage) string {
 	return fmt.Sprintf("[%v] %s: %s", time.Now().Local(), msg.From, msg.Message)
+}
+
+func (c *ClientHandler) contains(username string) bool {
+	for i := range c.Users {
+		if c.Users[i] == username {
+			return true
+		}
+	}
+
+	return false
 }

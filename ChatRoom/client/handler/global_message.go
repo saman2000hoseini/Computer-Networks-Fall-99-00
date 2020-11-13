@@ -25,6 +25,8 @@ func (c *ClientHandler) HandleGlobalMessage(body []byte) error {
 			c.messages <- fmt.Sprintf("[%v] \x1b[0;31m- %s disconnected\033[0m", time.Now().Local(), resp.Message)
 		}
 		c.usersChange <- true
+	} else {
+		c.messages <- fmt.Sprintf("[%v] %s", time.Now().Local(), resp.Message)
 	}
 
 	return nil

@@ -97,7 +97,9 @@ func (c *ClientHandler) handleRequest(req *request.Request, client *model.Client
 		return
 	}
 
-	client.Out <- resp
+	if client != nil {
+		client.Out <- resp
+	}
 }
 
 func (c *ClientHandler) Respond(client *model.Client) {

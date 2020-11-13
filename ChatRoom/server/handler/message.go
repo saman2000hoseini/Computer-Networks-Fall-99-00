@@ -19,6 +19,14 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 		return client, nil, err
 	}
 
+	if msg.To == "all" {
+		req, err := response.NewGlobalMessageResponse(newGlobalMsg(msg.From,
+			msg.Message), nil).GenerateResponse()
+
+		c.informAll(req)
+		return nil, nil, err
+	}
+
 	fmt.Printf("%s, %v\n", msg.To, c.clients[msg.To])
 	if c.clients[msg.To] != nil {
 		req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
@@ -29,4 +37,8 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 	msg.Message = utils.ErrUserNotFound
 	req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
 	return client, req, err
+}
+
+func newGlobalMsg(from, msg string) string {
+	return fmt.Sprintf("%s: %s", from, msg)
 }
