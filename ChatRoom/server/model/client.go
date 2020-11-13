@@ -12,6 +12,7 @@ type Client struct {
 	Writer     *bufio.Writer
 	Reader     *bufio.Reader
 	Out        chan *request.Request
+	In         chan *request.Request
 }
 
 func NewClient(connection net.Conn) *Client {
@@ -19,6 +20,7 @@ func NewClient(connection net.Conn) *Client {
 		Connection: connection,
 		Writer:     bufio.NewWriter(connection),
 		Reader:     bufio.NewReader(connection),
-		Out:        make(chan *request.Request, 20),
+		Out:        make(chan *request.Request, 100),
+		In:         make(chan *request.Request, 100),
 	}
 }

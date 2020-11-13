@@ -24,24 +24,23 @@ func NewClientHandler(db *gorm.DB) *ClientHandler {
 
 func (c *ClientHandler) StartListening(client *model.Client) {
 	for {
-		req := make([]byte, 1024)
+		req := make([]byte, 10240)
 
-		count, err := client.Reader.Read(req)
+		size, err := client.Reader.Read(req)
 		if err != nil {
 			delete(c.clients, client.Username)
 			response.LogOut(&c.clientIDs, client.Username)
 			c.informJoin(client.Username, false)
 			break
 		}
-		fmt.Println("request received")
 
-		protoRequest, err := unmarshal(req[:count])
+		protoRequest, err := unmarshal(req[:size])
 		if err != nil {
 			logrus.Errorf("client handler: err while unmarshalling proto: %s", err.Error())
 			continue
 		}
 
-		go c.handleRequest(protoRequest, client)
+		client.In <- protoRequest
 	}
 }
 
@@ -55,50 +54,54 @@ func unmarshal(req []byte) (*request.Request, error) {
 	return protoRequest, nil
 }
 
-func (c *ClientHandler) handleRequest(req *request.Request, client *model.Client) {
-	resp := &request.Request{}
-	var err error
+func (c *ClientHandler) HandleRequest(client *model.Client) {
+	for {
+		req := <-client.In
+		resp := &request.Request{}
+		var err error
 
-	switch req.Type {
-	case serverRequest.SignInType:
-		resp, err = c.HandleSignIn(req.Body, client)
-		break
-	case serverRequest.SignUpType:
-		fmt.Println("signup request")
-		resp, err = c.HandleSignUp(req.Body, client)
-		break
-	case serverRequest.PrivateMessageType:
-		client, resp, err = c.HandlePrivateMessage(req.Body, client)
-		break
-
-	}
-
-	if err != nil {
-		resp.Type = utils.ErrInternal
-
-		out, err := proto.Marshal(resp)
-		if err != nil {
-			logrus.Errorf("client handler: err while marshalling error proto: %s", err.Error())
-			return
+		switch req.Type {
+		case serverRequest.SignInType:
+			err = c.HandleSignIn(req.Body, client)
+			break
+		case serverRequest.SignUpType:
+			fmt.Println("signup request")
+			err = c.HandleSignUp(req.Body, client)
+			break
+		case serverRequest.PrivateMessageType:
+			err = c.HandlePrivateMessage(req.Body, client)
+			break
+		case serverRequest.FileType:
+			err = c.HandleWriteFile(req, client)
+			break
 		}
 
-		_, err = client.Writer.Write(out)
 		if err != nil {
-			logrus.Errorf("client handler: err while writing error proto: %s", err.Error())
-			return
+			fmt.Println(err.Error())
+			if resp == nil {
+				resp = &request.Request{}
+			}
+
+			resp.Type = utils.ErrInternal
+
+			out, err := proto.Marshal(resp)
+			if err != nil {
+				logrus.Errorf("client handler: err while marshalling error proto: %s", err.Error())
+				return
+			}
+
+			_, err = client.Writer.Write(out)
+			if err != nil {
+				logrus.Errorf("client handler: err while writing error proto: %s", err.Error())
+				return
+			}
+
+			err = client.Writer.Flush()
+			if err != nil {
+				logrus.Errorf("client handler: err while flushing writer: %s", err.Error())
+				return
+			}
 		}
-
-		err = client.Writer.Flush()
-		if err != nil {
-			logrus.Errorf("client handler: err while flushing writer: %s", err.Error())
-			return
-		}
-
-		return
-	}
-
-	if client != nil {
-		client.Out <- resp
 	}
 }
 

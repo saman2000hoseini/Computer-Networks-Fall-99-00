@@ -36,5 +36,6 @@ func Execute() {
 		client := model.NewClient(connection)
 		go clientHandler.StartListening(client)
 		go clientHandler.Respond(client)
+		go clientHandler.HandleRequest(client)
 	}
 }

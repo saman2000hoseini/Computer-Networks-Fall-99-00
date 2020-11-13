@@ -41,6 +41,7 @@ func (c *ClientHandler) Handle() {
 	var err error
 	go c.StartListening()
 	go c.Request()
+	go c.handleRequest()
 
 	c.entrance()
 
@@ -50,7 +51,7 @@ func (c *ClientHandler) Handle() {
 	}
 
 	c.gui.SetManagerFunc(view.Layout)
-	c.gui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, c.Send)
+	c.gui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, c.ParseInput)
 	c.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, c.Disconnect)
 	go c.writeMessage()
 	go c.updateUsers()
@@ -74,7 +75,7 @@ func (c *ClientHandler) StartListening() {
 			continue
 		}
 
-		go c.handleRequest(protoRequest)
+		c.client.In <- protoRequest
 	}
 }
 
@@ -88,21 +89,24 @@ func unmarshal(req []byte) (*request.Request, error) {
 	return protoRequest, nil
 }
 
-func (c *ClientHandler) handleRequest(req *request.Request) {
-	var err error
+func (c *ClientHandler) handleRequest() {
+	for {
+		req := <-c.client.In
+		var err error
 
-	switch req.Type {
-	case response.SignType:
-		err = c.HandleSign(req.Body)
-		break
-	case response.PrivateMessageType:
-		err = c.HandlePrivateMessage(req.Body)
-		break
-	case response.GlobalMessageType:
-		err = c.HandleGlobalMessage(req.Body)
-	}
-	if err != nil {
-		fmt.Println(err.Error())
+		switch req.Type {
+		case response.SignType:
+			err = c.HandleSign(req.Body)
+			break
+		case response.PrivateMessageType:
+			err = c.HandlePrivateMessage(req.Body)
+			break
+		case response.GlobalMessageType:
+			err = c.HandleGlobalMessage(req.Body)
+		}
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
 }
 
@@ -165,7 +169,7 @@ func (c *ClientHandler) Disconnect(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ClientHandler) writeMessage() {
-	<-time.Tick(1 * time.Second)
+	<-time.Tick(500 * time.Millisecond)
 	messagesView, err := c.gui.View("messages")
 	if err != nil {
 		panic(err)

@@ -24,42 +24,51 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte) error {
 	return nil
 }
 
-func (c *ClientHandler) Send(g *gocui.Gui, v *gocui.View) error {
-	msg, req, err := c.parseInput(*c.username, v.Buffer())
+func (c *ClientHandler) Send(req *request.Request, err error) error {
 	if err != nil {
 		c.messages <- err.Error()
 		return err
 	}
 
-	if msg.To != "all" {
-		c.messages <- msgToString(msg)
+	c.client.Out <- req
+
+	return nil
+}
+
+func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
+	var req *request.Request
+	var err error
+
+	args := strings.Split(v.Buffer(), ">")
+	args[0] = strings.TrimSpace(args[0])
+	args[1] = strings.TrimSpace(args[1])
+
+	switch args[0] {
+	case serverRequest.FileType:
+		go c.HandleWriteFile(*c.username, args[1], strings.TrimSpace(args[2]))
+		break
+	default:
+		if args[0] != "all" && !c.contains(args[0]) {
+			c.Send(nil, errors.New("user does not exist"))
+			return nil
+		}
+
+		msg, _ := serverRequest.NewMessageRequest(*c.username, args[0], args[1])
+		req, err = msg.GenerateRequest()
+		if err == nil && msg.To != "all" && req.Type == serverRequest.PrivateMessageType {
+			c.messages <- msgToString(msg)
+		}
+
+		c.Send(req, err)
 	}
 
-	c.client.Out <- req
 	g.Update(func(g *gocui.Gui) error {
 		v.Clear()
 		v.SetCursor(0, 0)
 		v.SetOrigin(0, 0)
 		return nil
 	})
-	return nil
-}
-
-func (c *ClientHandler) parseInput(username, input string) (*serverRequest.PrivateMessage, *request.Request, error) {
-	args := strings.Split(input, ">")
-	args[0] = strings.TrimSpace(args[0])
-	switch args[0] {
-	default:
-		if args[0] != "all" && !c.contains(args[0]) {
-			return nil, nil, errors.New("user does not exist")
-		}
-	}
-
-	msg, _ := serverRequest.NewMessageRequest(username, args[0], args[1])
-
-	req, err := msg.GenerateRequest()
-
-	return msg, req, err
+	return err
 }
 
 func msgToString(msg *serverRequest.PrivateMessage) string {
