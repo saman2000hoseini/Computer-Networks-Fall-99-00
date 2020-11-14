@@ -57,7 +57,11 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 
 		req := <-client.In
 		if req.Type != request.WriteFileType {
-			client.In <- req
+			if req.Type == request.PrivateMessageType {
+				go c.HandlePrivateMessage(req.Body, client)
+			} else {
+				client.In <- req
+			}
 			continue
 		}
 

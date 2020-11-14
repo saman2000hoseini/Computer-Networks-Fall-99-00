@@ -46,7 +46,13 @@ func (c *ClientHandler) HandleGetFile(initReq *request.Request) error {
 
 		req := <-c.client.In
 		if req.Type != response.DownloadFileType {
-			c.client.In <- req
+			if req.Type == response.PrivateMessageType {
+				go c.HandlePrivateMessage(req.Body)
+			} else if req.Type == response.GlobalMessageType {
+				go c.HandleGlobalMessage(req.Body)
+			} else {
+				c.client.In <- req
+			}
 			continue
 		}
 
