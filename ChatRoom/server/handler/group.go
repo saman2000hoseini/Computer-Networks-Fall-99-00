@@ -75,11 +75,8 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 
 	group.Members = append(group.Members, info.Username)
 	err = c.db.Save(group).Error
-	if err == nil {
-		client.Username = info.Username
-		c.clients[info.Username] = client
-		c.clientIDs = append(c.clientIDs, info.Username)
-		c.informJoin(info.Username, true)
+	if err != nil {
+		return err
 	}
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
@@ -162,20 +159,14 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 	group.Members[index] = group.Members[len(group.Members)-1]
 	group.Members[len(group.Members)-1] = ""
 	group.Members = group.Members[:len(group.Members)-1]
-	group.Members = append(group.Members, info.Username)
 	err = c.db.Save(group).Error
-	if err == nil {
-		client.Username = info.Username
-		c.clients[info.Username] = client
-		c.clientIDs = append(c.clientIDs, info.Username)
-		c.informJoin(info.Username, true)
-	}
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
-		client.Username+" removed user from group: "+info.Username).GenerateResponse()
+		group.Admin+" removed user from group: "+info.Username).GenerateResponse()
 	for i := range group.Members {
 		c.clients[group.Members[i]].Out <- req
 	}
+	c.clients[info.Username].Out <- req
 
 	return err
 }

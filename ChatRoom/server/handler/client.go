@@ -74,6 +74,18 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 		case request.ReadFileType:
 			err = c.HandleReadFile(req.Body, client)
 			break
+		case request.CreateGroupType:
+			err = c.HandleCreateGroup(req.Body, client)
+			break
+		case request.AddToGroupType:
+			err = c.HandleAddToGroup(req.Body, client)
+			break
+		case request.MsgToGroupType:
+			err = c.HandleMsgToGroup(req.Body, client)
+			break
+		case request.RmFromGroupType:
+			err = c.HandleRmFromGroup(req.Body, client)
+			break
 		}
 
 		if err != nil {

@@ -39,8 +39,9 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	var err error
 
 	args := strings.Split(v.Buffer(), ">")
-	args[0] = strings.TrimSpace(args[0])
-	args[1] = strings.TrimSpace(args[1])
+	for i := range args {
+		args[i] = strings.TrimSpace(args[i])
+	}
 
 	switch args[0] {
 	case "file":
@@ -92,6 +93,7 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 		msg, _ := request.NewMessageRequest(*c.username, args[0], args[1])
 		req, err = msg.GenerateRequest()
 		if err == nil && msg.To != "all" && req.Type == request.PrivateMessageType {
+			msg.From = fmt.Sprintf("You>> %s", msg.To)
 			c.messages <- msgToString(msg)
 		}
 

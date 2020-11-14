@@ -10,6 +10,7 @@ import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -64,7 +65,7 @@ func (c *ClientHandler) StartListening() {
 		req, err := c.client.Reader.ReadString('\n')
 		if err != nil {
 			//TODO
-			return
+			os.Exit(1)
 		}
 
 		jsonRequest, err := unmarshal([]byte(req))
