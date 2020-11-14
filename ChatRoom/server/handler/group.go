@@ -81,9 +81,7 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
 		client.Username+" added new user to group: "+info.Username).GenerateResponse()
-	for i := range group.Members {
-		c.clients[group.Members[i]].Out <- req
-	}
+	c.sendMsg(group, req)
 
 	return err
 }
@@ -115,9 +113,7 @@ func (c *ClientHandler) HandleMsgToGroup(body []byte, client *model.Client) erro
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
 		client.Username+": "+Msg.Msg).GenerateResponse()
-	for i := range group.Members {
-		c.clients[group.Members[i]].Out <- req
-	}
+	c.sendMsg(group, req)
 
 	return err
 }
@@ -163,9 +159,7 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
 		group.Admin+" removed user from group: "+info.Username).GenerateResponse()
-	for i := range group.Members {
-		c.clients[group.Members[i]].Out <- req
-	}
+	c.sendMsg(group, req)
 	c.clients[info.Username].Out <- req
 
 	return err
@@ -190,4 +184,12 @@ func isMember(username string, group model.Group) int {
 
 func groupMsg(name string) string {
 	return fmt.Sprintf("\u001B[1;35m%s\u001B", name)
+}
+
+func (c *ClientHandler) sendMsg(group model.Group, req *request.Request) {
+	for i := range group.Members {
+		if c.clients[group.Members[i]] != nil {
+			c.clients[group.Members[i]].Out <- req
+		}
+	}
 }
