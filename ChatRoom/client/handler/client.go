@@ -96,16 +96,12 @@ func (c *ClientHandler) handleRequest() {
 		switch req.Type {
 		case response.SignType:
 			err = c.HandleSign(req.Body)
-			break
 		case response.PrivateMessageType:
 			err = c.HandlePrivateMessage(req.Body)
-			break
 		case response.GlobalMessageType:
 			err = c.HandleGlobalMessage(req.Body)
-			break
 		case response.DownloadFileType:
 			err = c.HandleGetFile(req)
-			break
 		}
 		if err != nil {
 			fmt.Println(err.Error())

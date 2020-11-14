@@ -43,8 +43,7 @@ func (c *ClientHandler) HandleReadFile(body []byte, client *model.Client) error 
 	fSize := sourceFileStat.Size()
 	count := int64(0)
 
-	var fileReq *response.DownloadFile
-	fileReq = response.NewDownloadFileResponse(fileRequest.FileName, nil, count, fSize)
+	fileReq := response.NewDownloadFileResponse(fileRequest.FileName, nil, count, fSize)
 	req, err := fileReq.GenerateResponse()
 
 	client.Out <- req
@@ -60,11 +59,11 @@ func (c *ClientHandler) HandleReadFile(body []byte, client *model.Client) error 
 			break
 		}
 
-		res, err := response.NewDownloadFileResponse(fileRequest.FileName, buf, count, int64(n)).GenerateResponse()
+		res, _ := response.NewDownloadFileResponse(fileRequest.FileName, buf, count, int64(n)).GenerateResponse()
 
 		client.Out <- res
 		count++
 	}
 
-	return nil
+	return err
 }

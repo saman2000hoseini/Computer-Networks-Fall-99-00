@@ -9,19 +9,21 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 2. Sign in using username and password
 3. Send global messages to everyone in chatroom
 4. Send Private messages to a user
-5. Share files globally or privately
- 
+5. Share files
+6. Create groups, add/remove users to/from group and send messages to group members  
  
 ### Directory Structure
 ```
+.
 ├── client
 │   ├── cmd
 │   │   └── root.go
-│   ├── download
+│   ├── downloads
 │   ├── handler
 │   │   ├── client.go
 │   │   ├── file.go
 │   │   ├── global_message.go
+│   │   ├── group.go
 │   │   ├── message.go
 │   │   ├── sign.go
 │   │   └── write_file.go
@@ -36,10 +38,13 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 ├── go.mod
 ├── go.sum
 ├── myDB.db
+├── Output
 ├── pkg
 │   └── error.go
+├── README.md
 ├── request
 │   ├── file.go
+│   ├── group.go
 │   ├── private_message.go
 │   ├── request.go
 │   ├── sign_in.go
@@ -57,6 +62,7 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
     │   └── db.go
     ├── handler
     │   ├── client.go
+    │   ├── group.go
     │   ├── message.go
     │   ├── read_file.go
     │   ├── sign_in.go
@@ -68,7 +74,5 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
     │   ├── group.go
     │   └── user.go
     └── storage
-        ├── 1605333429_Operating_System_Concepts_10th_Edition.pdf
-        └── 1605335245_Operating_System_Concepts_10th_Edition.pdf
 ```
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jroimartin/gocui"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/pkg"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/request"
 	"github.com/sirupsen/logrus"
 	"strings"
@@ -86,7 +87,7 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 		c.Send(req, err)
 	default:
 		if args[0] != "all" && !c.contains(args[0]) {
-			c.Send(nil, errors.New("user does not exist"))
+			c.Send(nil, errors.New(pkg.ErrUserDoesntExist))
 			return nil
 		}
 
