@@ -1,10 +1,10 @@
-## Chat Room
+# Chat Room
 This is a simple chat room written in [**Go**](https://golang.org/).
 
 Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 # ![Chatroom Example App](Output)
 
-### Some Features:
+## Some Features:
 1. Sign up using unique username, password and email
 2. Sign in using username and password
 3. Send global messages to everyone in chatroom
@@ -12,7 +12,23 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 5. Share files
 6. Create groups, add/remove users to/from group and send messages to group members  
  
-### Directory Structure
+## Commands
+### Private Message
+`username> message`
+### Global Message
+`all> message` 
+### Share File
+`file> username/all> path`
+### New Group
+`new> groupname`
+### Add User To Group
+`add gp> groupname> username`
+### Remove User From Group
+`rm gp> groupname> username`
+### Send Message To Group
+`gp> groupname> message`
+ 
+## Directory Structure
 ```
 .
 ├── client
