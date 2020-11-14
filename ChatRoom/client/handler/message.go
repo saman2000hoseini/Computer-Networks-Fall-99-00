@@ -50,6 +50,39 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 		req, err := request.NewReadFileRequest(args[1]).GenerateRequest()
 		c.Send(req, err)
 		break
+	case "new":
+		newGp, err := request.NewCreateGroupRequest(args[1])
+		if err != nil {
+			c.Send(nil, err)
+		}
+
+		req, err := newGp.GenerateRequest()
+		c.Send(req, err)
+		break
+	case "add gp":
+		addGp, err := request.NewAddToGroupRequest(args[1], strings.TrimSpace(args[2]))
+		if err != nil {
+			c.Send(nil, err)
+		}
+
+		req, err := addGp.GenerateRequest()
+		c.Send(req, err)
+	case "rm gp":
+		rmGp, err := request.NewRmFromGroupRequest(args[1], strings.TrimSpace(args[2]))
+		if err != nil {
+			c.Send(nil, err)
+		}
+
+		req, err := rmGp.GenerateRequest()
+		c.Send(req, err)
+	case "gp":
+		msg, err := request.NewMsgToGroupRequest(args[1], strings.TrimSpace(args[2]))
+		if err != nil {
+			c.Send(nil, err)
+		}
+
+		req, err := msg.GenerateRequest()
+		c.Send(req, err)
 	default:
 		if args[0] != "all" && !c.contains(args[0]) {
 			c.Send(nil, errors.New("user does not exist"))

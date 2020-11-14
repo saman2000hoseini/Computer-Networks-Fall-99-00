@@ -39,7 +39,7 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 
 	for {
 		if counter*BufferSize >= fileRequest.Size {
-			fmt.Println("finished")
+			fmt.Println("New File Received")
 			if c.clients[*fileRequest.To] != nil {
 				req, err := response.NewMessageResponse(*fileRequest.From, *fileRequest.To,
 					generateMsg(fileRequest.FileName)).GenerateResponse()

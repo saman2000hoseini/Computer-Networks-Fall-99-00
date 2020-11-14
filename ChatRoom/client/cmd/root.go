@@ -6,10 +6,13 @@ import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"net"
+	"os"
 )
 
 func Execute() {
 	cfg := config.NewServer()
+
+	os.Mkdir("./client/downloads", 0755)
 
 	connection, err := net.DialTimeout(cfg.Network, cfg.Address, cfg.TimeOut)
 	if err != nil {
