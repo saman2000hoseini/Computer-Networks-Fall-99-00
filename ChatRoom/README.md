@@ -19,6 +19,9 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 `all> message` 
 ### Share File
 `file> username/all> path`
+`file> gp> groupname> path`
+### Get File
+`get> filename`
 ### New Group
 `new> groupname`
 ### Add User To Group

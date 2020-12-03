@@ -40,13 +40,21 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	var err error
 
 	args := strings.Split(v.Buffer(), ">")
+	if len(args) == 1 {
+		return nil
+	}
+
 	for i := range args {
 		args[i] = strings.TrimSpace(args[i])
 	}
 
 	switch args[0] {
 	case "file":
-		go c.HandleWriteFile(*c.username, args[1], strings.TrimSpace(args[2]))
+		if args[1] == "gp" {
+			go c.HandleWriteFile(*c.username, args[1]+">"+args[2], strings.TrimSpace(args[3]))
+		} else {
+			go c.HandleWriteFile(*c.username, args[1], strings.TrimSpace(args[2]))
+		}
 		break
 	case "get":
 		req, err := request.NewReadFileRequest(args[1]).GenerateRequest()
