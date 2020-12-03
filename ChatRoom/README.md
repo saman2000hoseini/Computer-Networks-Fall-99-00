@@ -9,10 +9,17 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 2. Sign in using username and password
 3. Send global messages to everyone in chatroom
 4. Send Private messages to a user
-5. Share files
+5. Share files to groups, users or everyone in the chatroom
 6. Create groups, add/remove users to/from group and send messages to group members  
  
 ## Commands
+### Entrance
+To sign-up: 
+`username, password, email`
+(email might be empty but don't forget the comma)
+
+To sign-in: 
+`username, password`
 ### Private Message
 `username> message`
 ### Global Message
@@ -30,7 +37,19 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 `rm gp> groupname> username`
 ### Send Message To Group
 `gp> groupname> message`
- 
+
+## Models
+
+### User
+|Username|Password| Email | Groups |  Friends  |
+|:----:|:---------:|:---------:|:---------:|:---------:|
+| string |  string |  string |  []string | []string     |
+
+### Group
+|  Name  | Admin | Members | 
+|:----:|:---------:|:---------:|
+| string |  string |  []string |
+
 ## Directory Structure
 ```
 .
@@ -40,6 +59,7 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 │   ├── downloads
 │   ├── handler
 │   │   ├── client.go
+│   │   ├── entrance.go
 │   │   ├── file.go
 │   │   ├── global_message.go
 │   │   ├── group.go
@@ -95,3 +115,9 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
     └── storage
 ```
 
+## TODO
+- [ ] More efficient error handling
+- [ ] Improve worker pool
+- [ ] Implement friends feature for users
+- [ ] Add profile photo for users
+- [ ] Improve gui
