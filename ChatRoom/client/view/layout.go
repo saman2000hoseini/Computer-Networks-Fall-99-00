@@ -36,5 +36,16 @@ func Layout(g *gocui.Gui) error {
 		users.Wrap = true
 	}
 
+	if name, err := g.SetView("main-menu", maxX/2-30, maxY/2-1, maxX/2+30, maxY/2+1); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		g.SetCurrentView("main-menu")
+		name.Title = " username, password, email(email is for registration) "
+		name.Autoscroll = false
+		name.Wrap = true
+		name.Editable = true
+	}
+
 	return nil
 }

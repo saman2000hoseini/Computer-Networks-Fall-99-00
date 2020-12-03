@@ -43,14 +43,12 @@ func (c *ClientHandler) Handle() {
 	go c.Request()
 	go c.handleRequest()
 
-	c.entrance()
-
 	c.gui, err = gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	c.gui.SetManagerFunc(view.Layout)
+	c.gui.SetKeybinding("main-menu", gocui.KeyEnter, gocui.ModNone, c.entrance)
 	c.gui.SetKeybinding("input", gocui.KeyEnter, gocui.ModNone, c.ParseInput)
 	c.gui.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, c.Disconnect)
 	go c.writeMessage()
@@ -109,10 +107,6 @@ func (c *ClientHandler) handleRequest() {
 	}
 }
 
-func printFirstMenu() {
-	fmt.Printf("1) Sign up\n2) Sign in\n")
-}
-
 func (c *ClientHandler) Request() {
 	for {
 		req := <-c.client.Out
@@ -134,31 +128,6 @@ func (c *ClientHandler) Request() {
 			logrus.Errorf("client: error while flushing writer: %s", err.Error())
 			return
 		}
-	}
-}
-
-func (c *ClientHandler) entrance() {
-	for !c.signedIn {
-		printFirstMenu()
-		var cmd int
-		fmt.Scanf("%d\n", &cmd)
-		if cmd == 1 {
-			var username, password, email string
-			fmt.Scanf("%s\n%s\n%s\n", &username, &password, &email)
-			c.username = &username
-			su, _ := request.NewSignUpRequest(username, password, email)
-			req, _ := su.GenerateRequest()
-			c.client.Out <- req
-		} else if cmd == 2 {
-			var username, password string
-			fmt.Scanf("%s\n%s\n", &username, &password)
-			c.username = &username
-			si, _ := request.NewSignInRequest(username, password)
-			req, _ := si.GenerateRequest()
-			c.client.Out <- req
-		}
-
-		<-c.waiter
 	}
 }
 
