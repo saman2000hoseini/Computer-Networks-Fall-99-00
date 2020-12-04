@@ -10,7 +10,8 @@ Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
 3. Send global messages to everyone in chatroom
 4. Send Private messages to a user
 5. Share files to groups, users or everyone in the chatroom
-6. Create groups, add/remove users to/from group and send messages to group members  
+6. Create groups, add/remove users to/from group and send messages to group members
+7. Change user info (username, email and password)
  
 ## Commands
 ### Entrance
