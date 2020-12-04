@@ -2,7 +2,7 @@
 This is a simple chat room written in [**Go**](https://golang.org/).
 
 Database implemented using [gorm](https://gorm.io/) (An ORM for Go).
-# ![Chatroom Example App](Output)
+# ![Chatroom Example App](Output.png)
 
 ## Some Features:
 1. Sign up using unique username, password and email
