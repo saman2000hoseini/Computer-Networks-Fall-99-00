@@ -84,6 +84,7 @@ To sign-in:
 │   └── error.go
 ├── README.md
 ├── request
+│   ├── change_info.go
 │   ├── file.go
 │   ├── group.go
 │   ├── private_message.go
@@ -91,6 +92,7 @@ To sign-in:
 │   ├── sign_in.go
 │   └── sign_up.go
 ├── response
+│   ├── change_info.go
 │   ├── file.go
 │   ├── global_message.go
 │   ├── private_message.go
@@ -102,6 +104,7 @@ To sign-in:
     ├── db
     │   └── db.go
     ├── handler
+    │   ├── change_info.go
     │   ├── client.go
     │   ├── group.go
     │   ├── message.go
