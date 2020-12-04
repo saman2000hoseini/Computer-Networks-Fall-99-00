@@ -9,27 +9,31 @@ import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type ClientHandler struct {
-	userRepo  model.UserRepo
-	groupRepo model.GroupRepo
-	clients   map[string]*model.Client
-	clientIDs []string
+	userRepo    model.UserRepo
+	groupRepo   model.GroupRepo
+	clients     map[uint64]*model.Client
+	clientIDs   []uint64
+	clientsUser map[uint64]string
+	clientsID   map[string]uint64
 }
 
 func NewClientHandler(db *gorm.DB) *ClientHandler {
 	return &ClientHandler{userRepo: model.SQLUserRepo{DB: db}, groupRepo: model.SQLGroupRepo{DB: db},
-		clients: make(map[string]*model.Client), clientIDs: make([]string, 0)}
+		clients: make(map[uint64]*model.Client), clientIDs: make([]uint64, 0), clientsUser: make(map[uint64]string),
+		clientsID: make(map[string]uint64)}
 }
 
 func (c *ClientHandler) StartListening(client *model.Client) {
 	for {
 		req, err := client.Reader.ReadString('\n')
 		if err != nil {
-			delete(c.clients, client.Username)
-			response.LogOut(&c.clientIDs, client.Username)
+			delete(c.clients, client.ID)
+			delete(c.clientsID, client.Username)
+			delete(c.clientsUser, client.ID)
+			response.LogOut(&c.clientIDs, client.ID)
 			c.informJoin(client.Username, false)
 			break
 		}
@@ -144,12 +148,11 @@ func (c *ClientHandler) Respond(client *model.Client) {
 }
 
 func (c *ClientHandler) informJoin(username string, joined bool) {
-	gm, err := response.NewGlobalMessageResponse(username, &joined).GenerateResponse()
+	gm, err := response.NewGlobalMessageResponse(c.clientsUser[c.clientsID[username]], &joined).GenerateResponse()
 	if err != nil {
 		logrus.Errorf("client handler: error while generating global message: %s", err.Error())
 		return
 	}
-	fmt.Println("Online: " + strings.Join(c.clientIDs, ", "))
 	c.informAll(gm)
 }
 

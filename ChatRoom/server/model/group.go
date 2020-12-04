@@ -3,19 +3,20 @@ package model
 import (
 	"github.com/lib/pq"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type Group struct {
 	Name    string         `gorm:"size:250;primaryKey"`
-	Admin   string         `gorm:"size:250;null"`
+	Admin   uint64         `gorm:"not null"`
 	Members pq.StringArray `gorm:"type:text[]"`
 }
 
-func NewGroup(name, admin string) *Group {
+func NewGroup(name string, admin uint64) *Group {
 	return &Group{
 		Name:    name,
 		Admin:   admin,
-		Members: []string{admin},
+		Members: []string{strconv.FormatUint(admin, 10)},
 	}
 }
 

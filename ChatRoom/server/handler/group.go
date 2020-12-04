@@ -8,6 +8,7 @@ import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/response"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
+	"strconv"
 )
 
 func (c *ClientHandler) HandleCreateGroup(body []byte, client *model.Client) error {
@@ -18,7 +19,7 @@ func (c *ClientHandler) HandleCreateGroup(body []byte, client *model.Client) err
 		return err
 	}
 
-	group := model.NewGroup(info.Name, client.Username)
+	group := model.NewGroup(info.Name, client.ID)
 
 	err = c.groupRepo.Save(group)
 	if err == nil {
@@ -53,7 +54,7 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 		return err
 	}
 
-	if isMember(client.Username, group) == -1 {
+	if isMember(c.clientsID[client.Username], group) == -1 {
 		req, err := response.NewMessageResponse("server", client.Username,
 			pkg.ErrNoAccess).GenerateResponse()
 		client.Out <- req
@@ -61,7 +62,7 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 		return err
 	}
 
-	if isMember(info.Username, group) != -1 {
+	if isMember(c.clientsID[info.Username], group) != -1 {
 		req, err := response.NewMessageResponse("server", client.Username,
 			"user already exists").GenerateResponse()
 		client.Out <- req
@@ -99,7 +100,7 @@ func (c *ClientHandler) HandleMsgToGroup(body []byte, client *model.Client) erro
 		return err
 	}
 
-	if isMember(client.Username, group) == -1 {
+	if isMember(c.clientsID[client.Username], group) == -1 {
 		req, err := response.NewMessageResponse("server", client.Username,
 			pkg.ErrNoAccess).GenerateResponse()
 		client.Out <- req
@@ -131,7 +132,7 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 		return err
 	}
 
-	if client.Username != group.Admin {
+	if client.ID != group.Admin {
 		req, err := response.NewMessageResponse("server", client.Username,
 			pkg.ErrNoAccess).GenerateResponse()
 		client.Out <- req
@@ -139,7 +140,7 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 		return err
 	}
 
-	index := isMember(info.Username, group)
+	index := isMember(c.clientsID[info.Username], group)
 	if index == -1 {
 		req, err := response.NewMessageResponse("server", client.Username,
 			"user is not in the group").GenerateResponse()
@@ -154,18 +155,18 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 	err = c.groupRepo.Update(group)
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
-		group.Admin+" removed user from group: "+info.Username).GenerateResponse()
+		c.clientsUser[group.Admin]+" removed user from group: "+info.Username).GenerateResponse()
 	c.sendMsg(group, req)
-	if c.clients[info.Username] != nil {
-		c.clients[info.Username].Out <- req
+	if c.clients[c.clientsID[info.Username]] != nil {
+		c.clients[c.clientsID[info.Username]].Out <- req
 	}
 
 	return err
 }
 
-func isMember(username string, group model.Group) int {
+func isMember(id uint64, group model.Group) int {
 	for i := range group.Members {
-		if group.Members[i] == username {
+		if group.Members[i] == strconv.FormatUint(id, 10) {
 			return i
 		}
 	}
@@ -179,8 +180,8 @@ func groupMsg(name string) string {
 
 func (c *ClientHandler) sendMsg(group model.Group, req *request.Request) {
 	for i := range group.Members {
-		if c.clients[group.Members[i]] != nil {
-			c.clients[group.Members[i]].Out <- req
+		if c.clients[c.clientsID[group.Members[i]]] != nil {
+			c.clients[c.clientsID[group.Members[i]]].Out <- req
 		}
 	}
 }

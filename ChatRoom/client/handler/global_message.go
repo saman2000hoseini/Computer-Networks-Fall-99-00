@@ -21,7 +21,7 @@ func (c *ClientHandler) HandleGlobalMessage(body []byte) error {
 			c.Users = append(c.Users, resp.Message)
 			c.messages <- fmt.Sprintf("[%v] \033[1;32m+ %s connected\033[0m", time.Now().Local(), resp.Message)
 		} else {
-			response.LogOut(&c.Users, resp.Message)
+			logOut(&c.Users, resp.Message)
 			c.messages <- fmt.Sprintf("[%v] \x1b[0;31m- %s disconnected\033[0m", time.Now().Local(), resp.Message)
 		}
 		c.usersChange <- true
@@ -30,4 +30,15 @@ func (c *ClientHandler) HandleGlobalMessage(body []byte) error {
 	}
 
 	return nil
+}
+
+func logOut(users *[]string, id string) {
+	for index := range *users {
+		if (*users)[index] == id {
+			(*users)[index] = (*users)[len(*users)-1]
+			(*users)[len(*users)-1] = ""
+			*users = (*users)[:len(*users)-1]
+			return
+		}
+	}
 }

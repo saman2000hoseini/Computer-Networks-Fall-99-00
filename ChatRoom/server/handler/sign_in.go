@@ -33,12 +33,15 @@ func (c *ClientHandler) HandleSignIn(body []byte, client *model.Client) error {
 		return err
 	}
 
-	client.Username = info.Username
-	c.clients[info.Username] = client
-	c.clientIDs = append(c.clientIDs, info.Username)
-	c.informJoin(info.Username, true)
+	client.Username = stored.Username
+	client.ID = stored.ID
+	c.clients[stored.ID] = client
+	c.clientIDs = append(c.clientIDs, stored.ID)
+	c.clientsUser[stored.ID] = stored.Username
+	c.clientsID[stored.Username] = stored.ID
+	c.informJoin(stored.Username, true)
 
-	req, err := response.NewSignResponse(nil, c.clientIDs).GenerateResponse()
+	req, err := response.NewSignResponse(nil, c.clientsID).GenerateResponse()
 	client.Out <- req
 
 	return err

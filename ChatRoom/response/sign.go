@@ -16,12 +16,17 @@ type Sign struct {
 	OnlineUsers []string `json:"online_users"`
 }
 
-func NewSignResponse(err error, onlineUsers []string) *Sign {
-	if err != nil {
-		return &Sign{err.Error(), onlineUsers}
+func NewSignResponse(err error, onlineUsers map[string]uint64) *Sign {
+	users := make([]string, 0, len(onlineUsers))
+	for k := range onlineUsers {
+		users = append(users, k)
 	}
 
-	return &Sign{Success, onlineUsers}
+	if err != nil {
+		return &Sign{err.Error(), users}
+	}
+
+	return &Sign{Success, users}
 }
 
 func (s Sign) GenerateResponse() (*request.Request, error) {
@@ -33,11 +38,11 @@ func (s Sign) GenerateResponse() (*request.Request, error) {
 	return New(SignType, body), nil
 }
 
-func LogOut(users *[]string, user string) {
+func LogOut(users *[]uint64, id uint64) {
 	for index := range *users {
-		if (*users)[index] == user {
+		if (*users)[index] == id {
 			(*users)[index] = (*users)[len(*users)-1]
-			(*users)[len(*users)-1] = ""
+			(*users)[len(*users)-1] = 0
 			*users = (*users)[:len(*users)-1]
 			return
 		}

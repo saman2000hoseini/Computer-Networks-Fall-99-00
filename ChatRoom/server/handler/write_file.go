@@ -48,11 +48,11 @@ func (c *ClientHandler) HandleWriteFile(initReq *request.Request, client *model.
 				c.informAll(req)
 				return err
 			}
-			if c.clients[*fileRequest.To] != nil {
+			if c.clients[c.clientsID[*fileRequest.To]] != nil {
 				req, err := response.NewMessageResponse(*fileRequest.From, *fileRequest.To,
 					generateMsg(fileRequest.FileName)).GenerateResponse()
 
-				c.clients[*fileRequest.To].Out <- req
+				c.clients[c.clientsID[*fileRequest.To]].Out <- req
 				return err
 			}
 			args := strings.Split(*fileRequest.To, ">")

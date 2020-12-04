@@ -26,9 +26,9 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 		return err
 	}
 
-	if c.clients[msg.To] != nil {
+	if c.clients[c.clientsID[msg.To]] != nil {
 		req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
-		c.clients[msg.To].Out <- req
+		c.clients[c.clientsID[msg.To]].Out <- req
 		return err
 	}
 

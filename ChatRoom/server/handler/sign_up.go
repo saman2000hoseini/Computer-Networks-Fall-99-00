@@ -20,13 +20,16 @@ func (c *ClientHandler) HandleSignUp(body []byte, client *model.Client) error {
 
 	err = c.userRepo.Save(user)
 	if err == nil {
-		client.Username = info.Username
-		c.clients[info.Username] = client
-		c.clientIDs = append(c.clientIDs, info.Username)
-		c.informJoin(info.Username, true)
+		client.ID = user.ID
+		client.Username = user.Username
+		c.clients[user.ID] = client
+		c.clientIDs = append(c.clientIDs, user.ID)
+		c.clientsUser[user.ID] = user.Username
+		c.clientsID[user.Username] = user.ID
+		c.informJoin(user.Username, true)
 	}
 
-	req, err := response.NewSignResponse(err, c.clientIDs).GenerateResponse()
+	req, err := response.NewSignResponse(err, c.clientsID).GenerateResponse()
 	client.Out <- req
 
 	return err

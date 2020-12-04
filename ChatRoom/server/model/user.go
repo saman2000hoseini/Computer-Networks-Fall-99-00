@@ -6,10 +6,10 @@ import (
 )
 
 type User struct {
-	Username string   `gorm:"primaryKey;not null"`
+	ID       uint64   `gorm:"primaryKey"`
+	Username string   `gorm:"unique;not null"`
 	Password string   `gorm:"not null"`
 	Email    string   `gorm:"null"`
-	Groups   []string `gorm:"type:text[];null"`
 	Friends  []string `gorm:"type:text[];null"`
 }
 
@@ -18,7 +18,6 @@ func NewUser(username, password, email string) *User {
 		Username: username,
 		Password: password,
 		Email:    email,
-		Groups:   nil,
 		Friends:  nil,
 	}
 }
