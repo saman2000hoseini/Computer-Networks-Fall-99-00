@@ -51,6 +51,10 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	switch args[0] {
 	case "change":
 		args := strings.Split(args[1], ",")
+		if len(args) != 3 {
+			return nil
+		}
+
 		for i := range args {
 			args[i] = strings.TrimSpace(args[i])
 		}

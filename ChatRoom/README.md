@@ -20,6 +20,8 @@ To sign-up:
 
 To sign-in: 
 `username, password`
+### Change info
+`change>username, password, email` you can leave at most 2 of them empty but don't forget the commas
 ### Private Message
 `username> message`
 ### Global Message
@@ -41,14 +43,14 @@ To sign-in:
 ## Models
 
 ### User
-|Username|Password| Email | Groups |  Friends  |
-|:----:|:---------:|:---------:|:---------:|:---------:|
-| string |  string |  string |  []string | []string     |
+|ID|Username|Password| Email | Groups |  Friends  |
+|:----:|:----:|:---------:|:---------:|:---------:|:---------:|
+|uint| string |  string |  string |  []string | []string     |
 
 ### Group
 |  Name  | Admin | Members | 
 |:----:|:---------:|:---------:|
-| string |  string |  []string |
+| string |  uint |  []uint |
 
 ## Directory Structure
 ```
