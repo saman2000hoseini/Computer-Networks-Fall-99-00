@@ -70,7 +70,7 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 		return err
 	}
 
-	group.Members = append(group.Members, info.Username)
+	group.Members = append(group.Members, strconv.FormatUint(c.clientsID[info.Username], 10))
 	err = c.groupRepo.Update(group)
 	if err != nil {
 		return err
@@ -180,8 +180,9 @@ func groupMsg(name string) string {
 
 func (c *ClientHandler) sendMsg(group model.Group, req *request.Request) {
 	for i := range group.Members {
-		if c.clients[c.clientsID[group.Members[i]]] != nil {
-			c.clients[c.clientsID[group.Members[i]]].Out <- req
+		id, err := strconv.ParseUint(group.Members[i], 10, 64)
+		if err == nil && c.clients[id] != nil {
+			c.clients[id].Out <- req
 		}
 	}
 }
