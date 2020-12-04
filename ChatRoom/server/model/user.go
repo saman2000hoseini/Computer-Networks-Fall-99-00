@@ -30,6 +30,7 @@ func (u *User) CheckPassword(p string) bool {
 type UserRepo interface {
 	Find(username string) (User, error)
 	Save(user *User) error
+	Update(user User) error
 }
 
 type SQLUserRepo struct {
@@ -45,4 +46,8 @@ func (r SQLUserRepo) Find(username string) (User, error) {
 
 func (r SQLUserRepo) Save(user *User) error {
 	return r.DB.Create(user).Error
+}
+
+func (r SQLUserRepo) Update(user User) error {
+	return r.DB.Save(user).Error
 }

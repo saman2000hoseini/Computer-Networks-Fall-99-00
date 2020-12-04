@@ -49,6 +49,19 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	switch args[0] {
+	case "change":
+		args := strings.Split(args[1], ",")
+		for i := range args {
+			args[i] = strings.TrimSpace(args[i])
+		}
+
+		chInfo, err := request.NewChangeInfoRequest(args[0], args[1], args[2])
+		if err != nil {
+			c.Send(nil, err)
+		}
+
+		req, err := chInfo.GenerateRequest()
+		c.Send(req, err)
 	case "file":
 		if args[1] == "gp" {
 			if len(args) < 4 {

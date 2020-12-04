@@ -66,6 +66,9 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 
 		fmt.Println(req.Type + " request")
 		switch req.Type {
+		case request.ChangeInfoType:
+			err = c.HandleChangeInfo(req.Body, client)
+			break
 		case request.SignInType:
 			err = c.HandleSignIn(req.Body, client)
 			break
@@ -148,7 +151,7 @@ func (c *ClientHandler) Respond(client *model.Client) {
 }
 
 func (c *ClientHandler) informJoin(username string, joined bool) {
-	gm, err := response.NewGlobalMessageResponse(c.clientsUser[c.clientsID[username]], &joined).GenerateResponse()
+	gm, err := response.NewGlobalMessageResponse(username, &joined).GenerateResponse()
 	if err != nil {
 		logrus.Errorf("client handler: error while generating global message: %s", err.Error())
 		return

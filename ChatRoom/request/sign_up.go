@@ -42,11 +42,3 @@ func (s SignUp) GenerateRequest() (*Request, error) {
 
 	return New(SignUpType, body), nil
 }
-
-type User interface {
-	Create(username, password, email string)
-	Update(username, password, newPassword, email *string)
-	Delete(username, password string)
-	Find(username string) uint
-	AddToGroup(username, groupID string)
-}

@@ -92,6 +92,8 @@ func (c *ClientHandler) handleRequest() {
 		var err error
 
 		switch req.Type {
+		case response.ChangeUserType:
+			err = c.updateUsername(req.Body)
 		case response.SignType:
 			err = c.HandleSign(req.Body)
 		case response.PrivateMessageType:
@@ -134,6 +136,18 @@ func (c *ClientHandler) Request() {
 func (c *ClientHandler) Disconnect(g *gocui.Gui, v *gocui.View) error {
 	c.client.Connection.Close()
 	return gocui.ErrQuit
+}
+
+func (c *ClientHandler) updateUsername(body []byte) error {
+	res := &response.ChangeUser{}
+	err := json.Unmarshal(body, res)
+	if err != nil {
+		logrus.Errorf("client private message handler: err while unmarshalling message body: %s", err.Error())
+		return err
+	}
+
+	c.username = &res.Username
+	return nil
 }
 
 func (c *ClientHandler) writeMessage() {
