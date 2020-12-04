@@ -9,16 +9,19 @@ import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type ClientHandler struct {
-	db        *gorm.DB
+	userRepo  model.UserRepo
+	groupRepo model.GroupRepo
 	clients   map[string]*model.Client
 	clientIDs []string
 }
 
 func NewClientHandler(db *gorm.DB) *ClientHandler {
-	return &ClientHandler{db: db, clients: make(map[string]*model.Client), clientIDs: make([]string, 0)}
+	return &ClientHandler{userRepo: model.SQLUserRepo{DB: db}, groupRepo: model.SQLGroupRepo{DB: db},
+		clients: make(map[string]*model.Client), clientIDs: make([]string, 0)}
 }
 
 func (c *ClientHandler) StartListening(client *model.Client) {
@@ -57,12 +60,12 @@ func (c *ClientHandler) HandleRequest(client *model.Client) {
 		resp := &request.Request{}
 		var err error
 
+		fmt.Println(req.Type + " request")
 		switch req.Type {
 		case request.SignInType:
 			err = c.HandleSignIn(req.Body, client)
 			break
 		case request.SignUpType:
-			fmt.Println("signup request")
 			err = c.HandleSignUp(req.Body, client)
 			break
 		case request.PrivateMessageType:
@@ -146,9 +149,7 @@ func (c *ClientHandler) informJoin(username string, joined bool) {
 		logrus.Errorf("client handler: error while generating global message: %s", err.Error())
 		return
 	}
-	fmt.Println(gm)
-	fmt.Println(c.clients)
-	fmt.Println(c.clientIDs)
+	fmt.Println("Online: " + strings.Join(c.clientIDs, ", "))
 	c.informAll(gm)
 }
 

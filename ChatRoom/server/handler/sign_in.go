@@ -18,8 +18,7 @@ func (c *ClientHandler) HandleSignIn(body []byte, client *model.Client) error {
 		return err
 	}
 
-	var stored model.User
-	err = c.db.Where(&model.User{Username: info.Username}).First(&stored).Error
+	stored, err := c.userRepo.Find(info.Username)
 	if err != nil {
 		req, err := response.NewSignResponse(err, nil).GenerateResponse()
 		client.Out <- req

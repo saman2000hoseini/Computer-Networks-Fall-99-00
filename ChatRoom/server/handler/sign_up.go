@@ -16,13 +16,9 @@ func (c *ClientHandler) HandleSignUp(body []byte, client *model.Client) error {
 		return err
 	}
 
-	user := &model.User{
-		Username: info.Username,
-		Password: info.Password,
-		Email:    info.Email,
-	}
+	user := model.NewUser(info.Username, info.Password, info.Email)
 
-	err = c.db.Create(user).Error
+	err = c.userRepo.Save(user)
 	if err == nil {
 		client.Username = info.Username
 		c.clients[info.Username] = client

@@ -18,13 +18,9 @@ func (c *ClientHandler) HandleCreateGroup(body []byte, client *model.Client) err
 		return err
 	}
 
-	group := &model.Group{
-		Name:    info.Name,
-		Admin:   client.Username,
-		Members: []string{client.Username},
-	}
+	group := model.NewGroup(info.Name, client.Username)
 
-	err = c.db.Create(group).Error
+	err = c.groupRepo.Save(group)
 	if err == nil {
 		req, err := response.NewMessageResponse("server", client.Username,
 			"group created: "+info.Name).GenerateResponse()
@@ -48,7 +44,7 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 		return err
 	}
 
-	group, err := c.findGroup(info.GroupName)
+	group, err := c.groupRepo.Find(info.GroupName)
 	if err != nil {
 		req, err := response.NewMessageResponse("server", client.Username,
 			"error finding group: "+err.Error()).GenerateResponse()
@@ -74,7 +70,7 @@ func (c *ClientHandler) HandleAddToGroup(body []byte, client *model.Client) erro
 	}
 
 	group.Members = append(group.Members, info.Username)
-	err = c.db.Save(group).Error
+	err = c.groupRepo.Update(group)
 	if err != nil {
 		return err
 	}
@@ -94,7 +90,7 @@ func (c *ClientHandler) HandleMsgToGroup(body []byte, client *model.Client) erro
 		return err
 	}
 
-	group, err := c.findGroup(Msg.GroupName)
+	group, err := c.groupRepo.Find(Msg.GroupName)
 	if err != nil {
 		req, err := response.NewMessageResponse("server", client.Username,
 			"error finding group: "+err.Error()).GenerateResponse()
@@ -126,7 +122,7 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 		return err
 	}
 
-	group, err := c.findGroup(info.GroupName)
+	group, err := c.groupRepo.Find(info.GroupName)
 	if err != nil {
 		req, err := response.NewMessageResponse("server", client.Username,
 			"error finding group: "+err.Error()).GenerateResponse()
@@ -155,21 +151,16 @@ func (c *ClientHandler) HandleRmFromGroup(body []byte, client *model.Client) err
 	group.Members[index] = group.Members[len(group.Members)-1]
 	group.Members[len(group.Members)-1] = ""
 	group.Members = group.Members[:len(group.Members)-1]
-	err = c.db.Save(group).Error
+	err = c.groupRepo.Update(group)
 
 	req, err := response.NewMessageResponse(groupMsg(group.Name), "all",
 		group.Admin+" removed user from group: "+info.Username).GenerateResponse()
 	c.sendMsg(group, req)
-	c.clients[info.Username].Out <- req
+	if c.clients[info.Username] != nil {
+		c.clients[info.Username].Out <- req
+	}
 
 	return err
-}
-
-func (c *ClientHandler) findGroup(name string) (model.Group, error) {
-	var stored model.Group
-	err := c.db.Where(&model.Group{Name: name}).First(&stored).Error
-
-	return stored, err
 }
 
 func isMember(username string, group model.Group) int {

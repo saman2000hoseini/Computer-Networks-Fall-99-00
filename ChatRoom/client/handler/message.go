@@ -51,8 +51,16 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 	switch args[0] {
 	case "file":
 		if args[1] == "gp" {
+			if len(args) < 4 {
+				return nil
+			}
+
 			go c.HandleWriteFile(*c.username, args[1]+">"+args[2], strings.TrimSpace(args[3]))
 		} else {
+			if len(args) < 3 {
+				return nil
+			}
+
 			go c.HandleWriteFile(*c.username, args[1], strings.TrimSpace(args[2]))
 		}
 		break
@@ -70,6 +78,10 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 		c.Send(req, err)
 		break
 	case "add gp":
+		if len(args) < 3 {
+			return nil
+		}
+
 		addGp, err := request.NewAddToGroupRequest(args[1], strings.TrimSpace(args[2]))
 		if err != nil {
 			c.Send(nil, err)
@@ -78,6 +90,10 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 		req, err := addGp.GenerateRequest()
 		c.Send(req, err)
 	case "rm gp":
+		if len(args) < 3 {
+			return nil
+		}
+
 		rmGp, err := request.NewRmFromGroupRequest(args[1], strings.TrimSpace(args[2]))
 		if err != nil {
 			c.Send(nil, err)
@@ -86,6 +102,10 @@ func (c *ClientHandler) ParseInput(g *gocui.Gui, v *gocui.View) error {
 		req, err := rmGp.GenerateRequest()
 		c.Send(req, err)
 	case "gp":
+		if len(args) < 3 {
+			return nil
+		}
+
 		msg, err := request.NewMsgToGroupRequest(args[1], strings.TrimSpace(args[2]))
 		if err != nil {
 			c.Send(nil, err)

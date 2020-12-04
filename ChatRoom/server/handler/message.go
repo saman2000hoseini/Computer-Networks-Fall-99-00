@@ -26,7 +26,6 @@ func (c *ClientHandler) HandlePrivateMessage(body []byte, client *model.Client) 
 		return err
 	}
 
-	fmt.Printf("%s, %v\n", msg.To, c.clients[msg.To])
 	if c.clients[msg.To] != nil {
 		req, err := response.NewMessageResponse(msg.From, msg.To, msg.Message).GenerateResponse()
 		c.clients[msg.To].Out <- req
