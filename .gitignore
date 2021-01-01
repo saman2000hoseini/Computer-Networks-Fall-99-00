@@ -128,3 +128,4 @@ modules.xml
 *.sqlite3
 /ChatRoom/client/downloads/
 /ChatRoom/server/storage/
+/PacketSniffer/reports
