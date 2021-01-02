@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/PacketSniffer/config"
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/PacketSniffer/sniffer"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/PacketSniffer/ui"
 	"os"
-	"time"
 )
 
 func Execute() {
@@ -12,11 +12,8 @@ func Execute() {
 
 	os.Mkdir(cfg.Path, 0755)
 
-	packetSniffer := sniffer.Sniffer{}
+	packetSniffer := new(sniffer.Sniffer)
+	cli := &ui.CLI{PacketSniffer: packetSniffer, Path: cfg.Path}
 
-	go packetSniffer.Capture(cfg.Path)
-
-	<-time.Tick(10 * time.Second)
-
-	packetSniffer.Finished = true
+	cli.Start()
 }
