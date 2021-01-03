@@ -3,11 +3,15 @@ package sniffer
 import (
 	"fmt"
 	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/PacketSniffer/model"
+	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/PacketSniffer/utils"
 	"github.com/sirupsen/logrus"
 	"math"
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/gopacket/pcap"
@@ -19,6 +23,7 @@ const (
 	transportName   = "Transport Layer"
 	applicationName = "Application Layer"
 	endpointsName   = "Endpoints"
+	fragmentsName   = "Fragments"
 	separator       = "------------------------------------------------------------------------------------"
 )
 
@@ -45,6 +50,7 @@ func (s *Sniffer) Capture(rPath, device string) {
 	transportLayer := make(map[string]uint64)
 	applicationLayer := make(map[string]uint64)
 	endpoints := make(map[string]uint64)
+	fragments := make(map[string]uint64)
 
 	minLength := math.MaxInt64
 	maxLength := math.MinInt64
@@ -58,12 +64,20 @@ func (s *Sniffer) Capture(rPath, device string) {
 		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 
 		for packet := range packetSource.Packets() {
-
 			if packet.LinkLayer() != nil {
 				linkLayer[packet.LinkLayer().LayerType().String()]++
 			}
 
 			if packet.NetworkLayer() != nil {
+				if ipv4 := packet.Layer(layers.LayerTypeIPv4); ipv4 != nil {
+					ip := ipv4.(*layers.IPv4)
+					if ip.Flags.String() == "DF" {
+						fragments["Dont Fragment"]++
+					} else {
+						fragments["Fragment"]++
+					}
+				}
+
 				networkLayer[packet.NetworkLayer().LayerType().String()]++
 
 				src, dest := packet.NetworkLayer().NetworkFlow().Endpoints()
@@ -115,6 +129,17 @@ func (s *Sniffer) Capture(rPath, device string) {
 	writeStatistics(sFile, networkName, networkLayer)
 	writeStatistics(sFile, transportName, transportLayer)
 	writeStatistics(sFile, applicationName, applicationLayer)
+	writeStatistics(sFile, fragmentsName, fragments)
+
+	if len(linkLayer) > 0 {
+		utils.DrawPieChart(linkLayer, generateChartPath(fPath, linkName))
+	}
+
+	utils.DrawPieChart(networkLayer, generateChartPath(fPath, networkName))
+	utils.DrawPieChart(transportLayer, generateChartPath(fPath, transportName))
+	utils.DrawPieChart(applicationLayer, generateChartPath(fPath, applicationName))
+	utils.DrawPieChart(endpoints, generateChartPath(fPath, endpointsName))
+	utils.DrawPieChart(fragments, generateChartPath(fPath, fragmentsName))
 
 	eFile, err := os.Create(fPath + "/endpoints.txt")
 	if err != nil {
@@ -156,22 +181,15 @@ func generateName(path string) string {
 		path, t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 }
 
-type pair struct {
-	Key   string
-	Value uint64
+func generateChartPath(path, name string) string {
+	return fmt.Sprintf("%s/%s", path, strings.Replace(name, " ", "", -1))
 }
 
-type pairList []pair
-
-func (p pairList) Len() int           { return len(p) }
-func (p pairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
-func (p pairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
-func sortEndpoints(endpoints map[string]uint64) pairList {
-	el := make(pairList, len(endpoints))
+func sortEndpoints(endpoints map[string]uint64) model.PairList {
+	el := make(model.PairList, len(endpoints))
 	i := 0
 	for k, v := range endpoints {
-		el[i] = pair{k, v}
+		el[i] = model.Pair{Key: k, Value: v}
 		i++
 	}
 

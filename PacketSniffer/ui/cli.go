@@ -29,7 +29,7 @@ func (c *CLI) Start() {
 			} else {
 				break
 			}
-			fmt.Print("Enter any key to finish capturing")
+			fmt.Print("Press enter to finish capturing")
 			fmt.Scanf("%s")
 			*c.PacketSniffer.Finished = true
 			break
