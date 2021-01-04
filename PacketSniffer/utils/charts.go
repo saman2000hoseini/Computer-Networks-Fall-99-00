@@ -9,6 +9,7 @@ import (
 
 const (
 	pieChartPath = "_PieChart.png"
+	barChartPath = "_BarChart.png"
 )
 
 func DrawPieChart(data map[string]uint64, path string) {
@@ -34,6 +35,36 @@ func DrawPieChart(data map[string]uint64, path string) {
 	}
 
 	writeChart(ch.Bytes(), path+pieChartPath)
+}
+
+func DrawBarChart(data map[string]uint64, path string) {
+	var values []chart.Value
+	for key, value := range data {
+		values = append(values, chart.Value{
+			Label: key,
+			Value: float64(value),
+		})
+	}
+
+	bar := chart.BarChart{
+		Background: chart.Style{
+			Padding: chart.Box{
+				Top: 40,
+			},
+		},
+		Height:   512,
+		BarWidth: 150,
+		Title:    "Bar Chart",
+		Bars:     values,
+	}
+
+	ch := bytes.NewBuffer([]byte{})
+
+	if err := bar.Render(chart.PNG, ch); err != nil {
+		return
+	}
+
+	writeChart(ch.Bytes(), path+barChartPath)
 }
 
 func writeChart(chart []byte, path string) {
