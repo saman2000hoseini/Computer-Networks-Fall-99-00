@@ -90,10 +90,10 @@ func (s *Sniffer) Capture(rPath, device string) {
 
 				if ipv4 := packet.Layer(layers.LayerTypeIPv4); ipv4 != nil {
 					ip := ipv4.(*layers.IPv4)
-					if ip.Flags.String() == "DF" {
-						fragments["Dont Fragment"]++
-					} else {
+					if ip.Flags.String() == "MF" || ip.FragOffset > 0 {
 						fragments["Fragment"]++
+					} else {
+						fragments["Dont Fragment"]++
 					}
 				}
 
