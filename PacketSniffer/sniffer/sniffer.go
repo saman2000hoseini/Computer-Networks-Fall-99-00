@@ -48,7 +48,7 @@ func (s *Sniffer) Capture(rPath, device string) {
 	defer file.Close()
 
 	var dFile *os.File
-	if *s.StoreDate {
+	if s.StoreDate != nil && *s.StoreDate {
 		dFile, err = os.Create(fPath + "/data.txt")
 		if err != nil {
 			logrus.Errorf("error creating file: %s", err.Error())
@@ -107,7 +107,7 @@ func (s *Sniffer) Capture(rPath, device string) {
 			if packet.TransportLayer() != nil {
 				transportLayer[packet.TransportLayer().LayerType().String()]++
 
-				if *s.StoreDate {
+				if s.StoreDate != nil && *s.StoreDate {
 					dFile.Write(packet.TransportLayer().LayerPayload())
 				}
 			}
