@@ -28,7 +28,9 @@ const (
 )
 
 type Sniffer struct {
-	Finished *bool
+	Target    *string
+	StoreDate *bool
+	Finished  *bool
 }
 
 func (s *Sniffer) Capture(rPath, device string) {
@@ -44,6 +46,17 @@ func (s *Sniffer) Capture(rPath, device string) {
 		return
 	}
 	defer file.Close()
+
+	var dFile *os.File
+	if *s.StoreDate {
+		dFile, err = os.Create(fPath + "/data.txt")
+		if err != nil {
+			logrus.Errorf("error creating file: %s", err.Error())
+			return
+		}
+
+		defer dFile.Close()
+	}
 
 	linkLayer := make(map[string]uint64)
 	networkLayer := make(map[string]uint64)
@@ -64,11 +77,17 @@ func (s *Sniffer) Capture(rPath, device string) {
 		packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 
 		for packet := range packetSource.Packets() {
-			if packet.LinkLayer() != nil {
-				linkLayer[packet.LinkLayer().LayerType().String()]++
+			if *s.Finished {
+				break
 			}
 
 			if packet.NetworkLayer() != nil {
+				src, dest := packet.NetworkLayer().NetworkFlow().Endpoints()
+				if s.Target != nil && *s.Target != src.String() && *s.Target != dest.String() {
+					continue
+				}
+				endpoints[endpointsString(src, dest)]++
+
 				if ipv4 := packet.Layer(layers.LayerTypeIPv4); ipv4 != nil {
 					ip := ipv4.(*layers.IPv4)
 					if ip.Flags.String() == "DF" {
@@ -79,13 +98,18 @@ func (s *Sniffer) Capture(rPath, device string) {
 				}
 
 				networkLayer[packet.NetworkLayer().LayerType().String()]++
+			}
 
-				src, dest := packet.NetworkLayer().NetworkFlow().Endpoints()
-				endpoints[endpointsString(src, dest)]++
+			if packet.LinkLayer() != nil {
+				linkLayer[packet.LinkLayer().LayerType().String()]++
 			}
 
 			if packet.TransportLayer() != nil {
 				transportLayer[packet.TransportLayer().LayerType().String()]++
+
+				if *s.StoreDate {
+					dFile.Write(packet.TransportLayer().LayerPayload())
+				}
 			}
 
 			if packet.ApplicationLayer() != nil {
@@ -107,10 +131,6 @@ func (s *Sniffer) Capture(rPath, device string) {
 			avg /= count
 
 			file.WriteString(packet.String())
-
-			if *s.Finished {
-				break
-			}
 		}
 	}
 
@@ -138,7 +158,7 @@ func (s *Sniffer) Capture(rPath, device string) {
 	utils.DrawPieChart(networkLayer, generateChartPath(fPath, networkName))
 	utils.DrawPieChart(transportLayer, generateChartPath(fPath, transportName))
 	utils.DrawPieChart(applicationLayer, generateChartPath(fPath, applicationName))
-	utils.DrawPieChart(endpoints, generateChartPath(fPath, endpointsName))
+	utils.DrawBarChart(endpoints, generateChartPath(fPath, endpointsName))
 	utils.DrawPieChart(fragments, generateChartPath(fPath, fragmentsName))
 
 	eFile, err := os.Create(fPath + "/endpoints.txt")

@@ -16,7 +16,7 @@ func (c *CLI) Start() {
 		printMainMenu()
 
 		var command byte
-		fmt.Scanf("%d", &command)
+		fmt.Scanf("%d\n", &command)
 
 		switch command {
 		case 1:
@@ -34,8 +34,21 @@ func (c *CLI) Start() {
 			*c.PacketSniffer.Finished = true
 			break
 		case 2:
+			fmt.Print("Please enter your target: ")
+			var target string
+			fmt.Scanf("%s\n", &target)
+
+			if len(target) > 7 {
+				c.PacketSniffer.Target = &target
+			}
 			break
 		case 3:
+			fmt.Print("Enter 1 to activate data storing and 0 to cancel it: ")
+			var store uint
+			fmt.Scanf("%d\n", &store)
+
+			boolStore := store%2 == 1
+			c.PacketSniffer.StoreDate = &boolStore
 			break
 		default:
 			return
@@ -45,6 +58,8 @@ func (c *CLI) Start() {
 
 func printMainMenu() {
 	fmt.Print("1) Start Packet Sniffing\n" +
+		"2) Set Target\n" +
+		"3) Store Data\n" +
 		"4) Exit\n")
 }
 
