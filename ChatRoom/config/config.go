@@ -15,7 +15,7 @@ type (
 	}
 )
 
-// New reads configuration with konaf.
+// NewServer reads configuration with konaf.
 func NewServer() Server {
 	var instance Server
 	k := koanf.New(".")

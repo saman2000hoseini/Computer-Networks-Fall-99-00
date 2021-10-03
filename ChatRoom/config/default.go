@@ -2,7 +2,7 @@ package config
 
 import "time"
 
-// Default return default configuration
+// DefaultServer return default configuration
 //nolint:gomnd
 func DefaultServer() Server {
 	return Server{

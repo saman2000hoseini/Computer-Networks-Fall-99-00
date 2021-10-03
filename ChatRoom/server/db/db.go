@@ -2,7 +2,9 @@ package db
 
 import (
 	"errors"
+
 	"github.com/saman2000hoseini/Computer-Networks-Fall-99-00/ChatRoom/server/model"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -21,7 +23,7 @@ func migrate(db *gorm.DB) error {
 	return err
 }
 
-//make database and create tables for the first time
+// FirstSetup makes database and creates tables for the first time
 func FirstSetup() (*gorm.DB, error) {
 	db, err := NewDB()
 	if err != nil {
